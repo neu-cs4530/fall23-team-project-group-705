@@ -26,7 +26,7 @@ import {
   TownSettingsUpdate,
   ViewingArea as ViewingAreaModel,
 } from '../types/CoveyTownSocket';
-import { isConversationArea, isTicTacToeArea, isViewingArea } from '../types/TypeUtils';
+import { isConversationArea, isDrawingArea, isTicTacToeArea, isViewingArea } from '../types/TypeUtils';
 import ConversationAreaController from './interactable/ConversationAreaController';
 import GameAreaController, { GameEventTypes } from './interactable/GameAreaController';
 import InteractableAreaController, {
@@ -34,6 +34,7 @@ import InteractableAreaController, {
 } from './interactable/InteractableAreaController';
 import TicTacToeAreaController from './interactable/TicTacToeAreaController';
 import ViewingAreaController from './interactable/ViewingAreaController';
+import DrawingAreaController from './interactable/DrawingAreaController';
 import PlayerController from './PlayerController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
@@ -549,6 +550,17 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     await this._townsService.createConversationArea(this.townID, this.sessionToken, newArea);
   }
 
+    /**
+   * Create a new drawing area, sending the request to the townService. Throws an error if the request
+   * is not successful. Does not immediately update local state about the new drawing area - it will be
+   * updated once the townService creates the area and emits an interactableUpdate
+   *
+   * @param newArea
+   */
+    async createDrawingArea(newArea: { id: string; occupants: Array<string> }) {
+      await this._townsService.createConversationArea(this.townID, this.sessionToken, newArea);
+    }
+
   /**
    * Create a new viewing area, sending the request to the townService. Throws an error if the request
    * is not successful. Does not immediately update local state about the new viewing area - it will be
@@ -601,7 +613,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             );
           } else if (isViewingArea(eachInteractable)) {
             this._interactableControllers.push(new ViewingAreaController(eachInteractable));
-          } else if (isTicTacToeArea(eachInteractable)) {
+          } else if (isDrawingArea(eachInteractable)) {
+            this._interactableControllers.push(
+              DrawingAreaController.fromDrawingAreaModel(
+                eachInteractable,
+                this._playersByIDs.bind(this),
+              ),
+            );
+          }else if (isTicTacToeArea(eachInteractable)) {
             this._interactableControllers.push(
               new TicTacToeAreaController(eachInteractable.id, eachInteractable, this),
             );
