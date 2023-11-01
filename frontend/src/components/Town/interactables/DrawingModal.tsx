@@ -40,6 +40,7 @@ export default function DrawingModal(): JSX.Element {
 
   const toast = useToast();
 
+  
   const createDrawing = useCallback(async () => {
     if (board && newDrawing) {
       const drawingToCreate = {
