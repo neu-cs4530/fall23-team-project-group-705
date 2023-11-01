@@ -3,6 +3,7 @@ import {
   Interactable,
   TicTacToeGameState,
   ViewingArea,
+  DrawingArea,
   GameArea,
 } from './CoveyTownSocket';
 
@@ -18,6 +19,13 @@ export function isConversationArea(interactable: Interactable): interactable is 
  */
 export function isViewingArea(interactable: Interactable): interactable is ViewingArea {
   return interactable.type === 'ViewingArea';
+}
+
+/**
+ * Test to see if an interactable is a drawing area
+ */
+export function isDrawingArea(interactable: Interactable): interactable is DrawingArea {
+  return interactable.type === 'DrawingArea';
 }
 
 export function isTicTacToeArea(
