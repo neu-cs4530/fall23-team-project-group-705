@@ -8,7 +8,7 @@
         "heroku-postbuild": "cd townService && npm install && npm run build",
         "run-townservice": "heroku local -p 3001 web",
         "lint": "cd townService && npm run-script lint && cd ../frontend && npm run-script lint && cd ../shared && npm run-script lint",
-		"zip": "npm-pack-zip"
+        "zip": "npm-pack-zip"
     },
     "repository": {
         "type": "git",
@@ -38,8 +38,11 @@
         "npm": "9.x.x"
     },
     "dependencies": {
+        "@excalidraw/excalidraw": "^0.16.1",
         "@types/ramda": "^0.27.34",
         "ramda": "^0.27.1",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
         "typescript-is": "^0.17.0"
     },
     "files": [
@@ -48,5 +51,5 @@
         "frontend/src/components/Town/interactables/TicTacToe/TicTacToeArea.tsx",
         "frontend/src/components/Town/interactables/TicTacToe/TicTacToeBoard.tsx",
         "frontend/src/components/Town/interactables/Leaderboard.tsx"
-        ]
+    ]
 }
