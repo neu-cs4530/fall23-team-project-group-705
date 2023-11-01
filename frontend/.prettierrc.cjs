@@ -12,5 +12,5 @@ module.exports = {
   arrowParens: 'avoid',
   proseWrap: 'always',
   htmlWhitespaceSensitivity: 'ignore',
-  endOfLine: 'auto',
+  endOfLine: 'lf',
 };
