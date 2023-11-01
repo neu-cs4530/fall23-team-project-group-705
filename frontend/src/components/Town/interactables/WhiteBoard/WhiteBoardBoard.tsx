@@ -1,8 +1,7 @@
-import { Button, chakra, Container, useToast } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Excalidraw } from '@excalidraw/excalidraw';
 
-export default function App() {
+export default function WhiteBoardBoard() {
   return (
     <>
       <h1 style={{ textAlign: 'center' }}>White Board</h1>
