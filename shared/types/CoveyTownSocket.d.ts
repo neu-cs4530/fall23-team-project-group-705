@@ -17,7 +17,7 @@ export type TownJoinResponse = {
   interactables: TypedInteractable[];
 }
 
-export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea';
+export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'DrawingArea';
 export interface Interactable {
   type: InteractableType;
   id: InteractableID;
@@ -59,6 +59,10 @@ export type ChatMessage = {
 
 export interface ConversationArea extends Interactable {
   topic?: string;
+};
+export interface DrawingArea extends Interactable {
+  // TODO: Add boardstate here
+  board?: any;
 };
 export interface BoundingBox {
   x: number;
