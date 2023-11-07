@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { DrawingArea as DrawingAreaModel } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
 import InteractableAreaController, { BaseInteractableEventMap } from './InteractableAreaController';
-import { ReactJSXElement } from '@emotion/react/types/jsx-namespace';
 
 /**
  * The events that the DrawingAreaController emits to subscribers. These events
@@ -21,25 +20,24 @@ export default class DrawingAreaController extends InteractableAreaController<
   DrawingAreaEvents,
   DrawingAreaModel
 > {
-
-  // Below is a placeholder for the board
-  board: any = undefined
+  // TODO: Define boardstate type
+  board: any = undefined;
 
   /**
    * Create a new DrawingAreaController
    * @param id
    * @param topic
    */
-  constructor(id: string) {
-    super(id);
-  }
+  // constructor(id: string) {
+  //   super(id);
+  // }
 
   public isActive(): boolean {
     return this.occupants.length > 0;
   }
 
   protected _updateFrom(newModel: DrawingAreaModel): void {
-    // Update the board here
+    // TODO: Update the board
   }
 
   /**
@@ -93,4 +91,3 @@ export function useDrawingAreaBoard(area: DrawingAreaController): string {
   }, [area]);
   return board;
 }
-

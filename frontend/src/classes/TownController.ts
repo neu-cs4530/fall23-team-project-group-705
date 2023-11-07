@@ -26,7 +26,12 @@ import {
   TownSettingsUpdate,
   ViewingArea as ViewingAreaModel,
 } from '../types/CoveyTownSocket';
-import { isConversationArea, isDrawingArea, isTicTacToeArea, isViewingArea } from '../types/TypeUtils';
+import {
+  isConversationArea,
+  isDrawingArea,
+  isTicTacToeArea,
+  isViewingArea,
+} from '../types/TypeUtils';
 import ConversationAreaController from './interactable/ConversationAreaController';
 import GameAreaController, { GameEventTypes } from './interactable/GameAreaController';
 import InteractableAreaController, {
@@ -550,16 +555,16 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     await this._townsService.createConversationArea(this.townID, this.sessionToken, newArea);
   }
 
-    /**
+  /**
    * Create a new drawing area, sending the request to the townService. Throws an error if the request
    * is not successful. Does not immediately update local state about the new drawing area - it will be
    * updated once the townService creates the area and emits an interactableUpdate
    *
    * @param newArea
    */
-    async createDrawingArea(newArea: { id: string; occupants: Array<string> }) {
-      await this._townsService.createConversationArea(this.townID, this.sessionToken, newArea);
-    }
+  async createDrawingArea(newArea: { id: string; occupants: Array<string> }) {
+    await this._townsService.createConversationArea(this.townID, this.sessionToken, newArea);
+  }
 
   /**
    * Create a new viewing area, sending the request to the townService. Throws an error if the request
@@ -620,7 +625,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
                 this._playersByIDs.bind(this),
               ),
             );
-          }else if (isTicTacToeArea(eachInteractable)) {
+          } else if (isTicTacToeArea(eachInteractable)) {
             this._interactableControllers.push(
               new TicTacToeAreaController(eachInteractable.id, eachInteractable, this),
             );

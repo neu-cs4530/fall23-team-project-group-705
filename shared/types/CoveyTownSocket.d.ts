@@ -61,7 +61,7 @@ export interface ConversationArea extends Interactable {
   topic?: string;
 };
 export interface DrawingArea extends Interactable {
-  // Placeholder for boardstate
+  // TODO: Add boardstate here
   board?: any;
 };
 export interface BoundingBox {

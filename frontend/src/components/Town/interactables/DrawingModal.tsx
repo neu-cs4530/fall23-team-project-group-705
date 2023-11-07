@@ -1,8 +1,5 @@
 import {
   Button,
-  FormControl,
-  FormLabel,
-  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -14,7 +11,6 @@ import {
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useInteractable } from '../../../classes/TownController';
-import { Omit_ConversationArea_type_ } from '../../../generated/client';
 import useTownController from '../../../hooks/useTownController';
 
 export default function DrawingModal(): JSX.Element {

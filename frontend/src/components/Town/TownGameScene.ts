@@ -23,7 +23,7 @@ function interactableTypeForObjectType(type: string): any {
   } else if (type === 'GameArea') {
     return GameArea;
   } else if (type === 'DrawingArea') {
-    return DrawingArea
+    return DrawingArea;
   } else {
     throw new Error(`Unknown object type: ${type}`);
   }

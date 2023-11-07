@@ -11,7 +11,6 @@ import {
 import InteractableArea from './InteractableArea';
 
 export default class DrawingArea extends InteractableArea {
-  
   /** The drawong area is "active" when there are players inside of it  */
   public get isActive(): boolean {
     return this._occupants.length > 0;
@@ -43,7 +42,7 @@ export default class DrawingArea extends InteractableArea {
   public remove(player: Player) {
     super.remove(player);
     if (this._occupants.length === 0) {
-      // Clear board?
+      // TODO: Clear board
       this._emitAreaChanged();
     }
   }
