@@ -12,6 +12,7 @@ import {
 import React, { useCallback, useEffect, useState } from 'react';
 import { useInteractable } from '../../../classes/TownController';
 import useTownController from '../../../hooks/useTownController';
+import WhiteBoardBoard from './WhiteBoard/WhiteBoardBoard';
 
 export default function DrawingModal(): JSX.Element {
   const coveyTownController = useTownController();
@@ -86,7 +87,7 @@ export default function DrawingModal(): JSX.Element {
             createDrawing();
           }}>
           <ModalBody>
-            <p>This is where the board would go.</p>
+            <WhiteBoardBoard />
           </ModalBody>
           <ModalFooter>
             <Button colorScheme='blue' mr={3} onClick={createDrawing}>
