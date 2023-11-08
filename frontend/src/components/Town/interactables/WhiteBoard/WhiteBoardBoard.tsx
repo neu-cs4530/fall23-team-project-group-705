@@ -5,7 +5,7 @@ export default function WhiteBoardBoard() {
   return (
     <>
       <h1 style={{ textAlign: 'center' }}>White Board</h1>
-      <div style={{ height: '500px' }}>
+      <div style={{ height: '1000px', width: '1200px' }}>
         <Excalidraw />
       </div>
     </>

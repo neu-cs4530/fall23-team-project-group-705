@@ -33,6 +33,12 @@ module.exports = {
     'no-underscore-dangle': 0,
     'no-param-reassign': 0,
     'no-restricted-syntax': 0,
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "crlf"
+      }
+    ],
     '@typescript-eslint/naming-convention': [
       'error',
       {
