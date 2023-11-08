@@ -78,7 +78,7 @@ export default function DrawingModal(): JSX.Element {
         coveyTownController.unPause();
       }}>
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent maxWidth={'10000px'}>
         <ModalHeader>Placeholder drawing interacteble named {newDrawing?.name} </ModalHeader>
         <ModalCloseButton />
         <form
