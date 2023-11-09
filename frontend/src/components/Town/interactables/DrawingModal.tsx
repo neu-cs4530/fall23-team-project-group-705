@@ -17,7 +17,7 @@ import WhiteBoardBoard from './WhiteBoard/WhiteBoardBoard';
 export default function DrawingModal(): JSX.Element {
   const coveyTownController = useTownController();
   const newDrawing = useInteractable('drawingArea');
-  const [board, setBoard] = useState<any>();
+  const [board, setBoard] = useState<unknown>();
 
   const isOpen = newDrawing !== undefined;
 
