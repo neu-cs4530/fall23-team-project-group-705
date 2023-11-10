@@ -7,9 +7,9 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect } from 'react';
-import { useInteractable } from '../../../classes/TownController';
-import useTownController from '../../../hooks/useTownController';
-import Whiteboard from './Whiteboard/Whiteboard';
+import { useInteractable } from '../../../../classes/TownController';
+import useTownController from '../../../../hooks/useTownController';
+import Whiteboard from './Whiteboard';
 
 export default function DrawingModal(): JSX.Element {
   const coveyTownController = useTownController();
@@ -39,10 +39,10 @@ export default function DrawingModal(): JSX.Element {
         coveyTownController.unPause();
       }}>
       <ModalOverlay />
-      <ModalContent maxW={'fit-content'} maxH={'fit-content'} margin={'3'}>
+      <ModalContent maxW={'fit-content'} maxH={'fit-content'} margin={'2'}>
         <ModalHeader paddingBottom={0}>Whiteboard</ModalHeader>
         <ModalCloseButton />
-        <ModalBody padding={0}>
+        <ModalBody padding={1}>
           <Whiteboard />
         </ModalBody>
       </ModalContent>

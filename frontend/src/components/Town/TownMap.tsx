@@ -6,7 +6,7 @@ import SocialSidebar from '../SocialSidebar/SocialSidebar';
 import NewConversationModal from './interactables/NewCoversationModal';
 import TownGameScene from './TownGameScene';
 import TicTacToeAreaWrapper from './interactables/TicTacToe/TicTacToeArea';
-import DrawingModal from './interactables/DrawingModal';
+import DrawingModal from './interactables/Whiteboard/DrawingModal';
 
 export default function TownMap(): JSX.Element {
   const coveyTownController = useTownController();

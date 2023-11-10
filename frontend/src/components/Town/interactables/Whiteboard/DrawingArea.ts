@@ -1,4 +1,4 @@
-import Interactable, { KnownInteractableTypes } from '../Interactable';
+import Interactable, { KnownInteractableTypes } from '../../Interactable';
 
 export default class DrawingArea extends Interactable {
   private _isInteracting = false;
