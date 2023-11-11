@@ -81,11 +81,10 @@ export default function PictionaryModal(): JSX.Element {
       <ModalContent maxWidth={'10000px'}>
         <ModalHeader>Placeholder pictionary interacteble named {newPictionary?.name} </ModalHeader>
         <ModalCloseButton />
-          <ModalBody>
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={closeModal}>Cancel</Button>
-          </ModalFooter>
+        <ModalBody></ModalBody>
+        <ModalFooter>
+          <Button onClick={closeModal}>Cancel</Button>
+        </ModalFooter>
       </ModalContent>
     </Modal>
   );

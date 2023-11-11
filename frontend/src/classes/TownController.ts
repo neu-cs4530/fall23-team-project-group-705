@@ -568,16 +568,16 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     await this._townsService.createConversationArea(this.townID, this.sessionToken, newArea);
   }
 
-    /**
+  /**
    * Create a new pictionary area, sending the request to the townService. Throws an error if the request
    * is not successful. Does not immediately update local state about the new pictionary area - it will be
    * updated once the townService creates the area and emits an interactableUpdate
    *
    * @param newArea
    */
-    async createPictionaryArea(newArea: { id: string; occupants: Array<string> }) {
-      await this._townsService.createPictionaryArea(this.townID, this.sessionToken, newArea);
-    }
+  async createPictionaryArea(newArea: { id: string; occupants: Array<string> }) {
+    await this._townsService.createPictionaryArea(this.townID, this.sessionToken, newArea);
+  }
 
   /**
    * Create a new viewing area, sending the request to the townService. Throws an error if the request
