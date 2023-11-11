@@ -7,6 +7,7 @@ import NewConversationModal from './interactables/NewCoversationModal';
 import TownGameScene from './TownGameScene';
 import TicTacToeAreaWrapper from './interactables/TicTacToe/TicTacToeArea';
 import DrawingModal from './interactables/DrawingModal';
+import PictionaryModal from './interactables/PictionaryModal';
 
 export default function TownMap(): JSX.Element {
   const coveyTownController = useTownController();
@@ -52,6 +53,7 @@ export default function TownMap(): JSX.Element {
       <NewConversationModal />
       <TicTacToeAreaWrapper />
       <DrawingModal />
+      <PictionaryModal />
 
       <div id='map-container' />
       <div id='social-container'>
