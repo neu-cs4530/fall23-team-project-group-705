@@ -29,6 +29,7 @@ import {
 import {
   isConversationArea,
   isDrawingArea,
+  isPictionaryArea,
   isTicTacToeArea,
   isViewingArea,
 } from '../types/TypeUtils';
@@ -40,6 +41,7 @@ import InteractableAreaController, {
 import TicTacToeAreaController from './interactable/TicTacToeAreaController';
 import ViewingAreaController from './interactable/ViewingAreaController';
 import DrawingAreaController from './interactable/DrawingAreaController';
+import PictionaryAreaController from './interactable/PictionaryAreaController';
 import PlayerController from './PlayerController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
@@ -567,6 +569,17 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   /**
+   * Create a new pictionary area, sending the request to the townService. Throws an error if the request
+   * is not successful. Does not immediately update local state about the new pictionary area - it will be
+   * updated once the townService creates the area and emits an interactableUpdate
+   *
+   * @param newArea
+   */
+  async createPictionaryArea(newArea: { id: string; occupants: Array<string> }) {
+    await this._townsService.createPictionaryArea(this.townID, this.sessionToken, newArea);
+  }
+
+  /**
    * Create a new viewing area, sending the request to the townService. Throws an error if the request
    * is not successful. Does not immediately update local state about the new viewing area - it will be
    * updated once the townService creates the area and emits an interactableUpdate
@@ -621,6 +634,13 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
           } else if (isDrawingArea(eachInteractable)) {
             this._interactableControllers.push(
               DrawingAreaController.fromDrawingAreaModel(
+                eachInteractable,
+                this._playersByIDs.bind(this),
+              ),
+            );
+          } else if (isPictionaryArea(eachInteractable)) {
+            this._interactableControllers.push(
+              PictionaryAreaController.fromPictionaryAreaModel(
                 eachInteractable,
                 this._playersByIDs.bind(this),
               ),
