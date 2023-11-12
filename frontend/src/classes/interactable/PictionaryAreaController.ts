@@ -1,9 +1,4 @@
-import _ from 'lodash';
-import {
-  GameArea,
-  GameStatus,
-  PictionaryGameState,
-} from '../../types/CoveyTownSocket';
+import { GameArea, GameStatus, PictionaryGameState } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
 import GameAreaController, { GameEventTypes } from './GameAreaController';
 
@@ -23,7 +18,7 @@ export default class PictionaryAreaController extends GameAreaController<
   PictionaryGameState,
   PictionaryEvents
 > {
-  protected _currentWord: string = "";
+  protected _currentWord = '';
 
   /**
    * Returns the current word being guessed.
@@ -97,7 +92,7 @@ export default class PictionaryAreaController extends GameAreaController<
    * If the turn has not changed, does not emit the event.
    */
   protected _updateFrom(newModel: GameArea<PictionaryGameState>): void {
-    console.log("_updateFrom called.");
+    console.log('_updateFrom called.');
   }
 
   /**
@@ -105,7 +100,7 @@ export default class PictionaryAreaController extends GameAreaController<
    *
    * If the game is not in progress, throws an error NO_GAME_IN_PROGRESS_ERROR
    *
-   * @param guessWord the word that is being submitted as a guess. 
+   * @param guessWord the word that is being submitted as a guess.
    */
   public async makeGuess(guessWord: string) {
     const instanceID = this._instanceID;

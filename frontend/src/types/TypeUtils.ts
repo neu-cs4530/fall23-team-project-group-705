@@ -4,7 +4,6 @@ import {
   TicTacToeGameState,
   ViewingArea,
   DrawingArea,
-  PictionaryArea,
   GameArea,
   PictionaryGameState,
 } from './CoveyTownSocket';

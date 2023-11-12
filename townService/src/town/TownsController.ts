@@ -19,7 +19,6 @@ import InvalidParametersError from '../lib/InvalidParametersError';
 import CoveyTownsStore from '../lib/TownsStore';
 import {
   ConversationArea,
-  PictionaryArea,
   CoveyTownSocket,
   TownSettingsUpdate,
   ViewingArea,

@@ -56,7 +56,8 @@ import GameAreaInteractable from '../GameArea';
  *
  */
 function PictionaryArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
-  const gameAreaController = useInteractableAreaController<PictionaryAreaController>(interactableID);
+  const gameAreaController =
+    useInteractableAreaController<PictionaryAreaController>(interactableID);
   const townController = useTownController();
 
   const [history, setHistory] = useState<GameResult[]>(gameAreaController.history);
@@ -108,10 +109,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     gameStatusText = (
       <>
         Game in progress, currently{' '}
-        {drawer === townController.ourPlayer
-          ? 'your'
-          : drawer?.userName + "'s"}{' '}
-        turn
+        {drawer === townController.ourPlayer ? 'your' : drawer?.userName + "'s"} turn
       </>
     );
   } else {

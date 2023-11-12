@@ -1,13 +1,16 @@
 import InvalidParametersError, {
-  GAME_FULL_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
-  BOARD_POSITION_NOT_EMPTY_MESSAGE,
   MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
-import { GameMove, PictionaryGameState, PictionaryMove, PlayerID } from '../../types/CoveyTownSocket';
+import {
+  GameMove,
+  PictionaryGameState,
+  PictionaryMove,
+  PlayerID,
+} from '../../types/CoveyTownSocket';
 import Game from './Game';
 
 /**
@@ -17,12 +20,12 @@ import Game from './Game';
 export default class PictionaryGame extends Game<PictionaryGameState, PictionaryMove> {
   public constructor() {
     super({
-      currentWord: "",
+      currentWord: '',
       status: 'WAITING_TO_START',
     });
   }
 
-  private _currentWord: string = "";
+  private _currentWord = '';
 
   private _validateMove(move: PictionaryMove) {
     // A move is only valid if the player is not drawing
@@ -63,7 +66,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   public applyMove(move: GameMove<PictionaryMove>): void {
     // TODO: Apply move
 
-    const cleanMove: PictionaryMove = { guesser: "", guessWord: ""};
+    const cleanMove: PictionaryMove = { guesser: '', guessWord: '' };
     this._validateMove(cleanMove);
     this._applyMove(cleanMove);
   }
@@ -106,17 +109,18 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
    */
   protected _leave(player: Player): void {
-    if (!(this._playerInGame(player.id))) {
+    if (!this._playerInGame(player.id)) {
       throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
     }
-    
+
     // TODO: Implement leaving the game
   }
 
   private _playerInGame(playerID: PlayerID): boolean {
-    return this.state.drawer === playerID 
-    || (this.state.guessers !== undefined && this.state.guessers?.some((guesserID) => {
-      return guesserID === playerID;
-    }));
+    return (
+      this.state.drawer === playerID ||
+      (this.state.guessers !== undefined &&
+        this.state.guessers?.some(guesserID => guesserID === playerID))
+    );
   }
 }

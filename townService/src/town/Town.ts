@@ -9,7 +9,6 @@ import { isViewingArea } from '../TestUtils';
 import {
   ChatMessage,
   ConversationArea as ConversationAreaModel,
-  PictionaryArea as PictionaryAreaModel,
   CoveyTownSocket,
   Interactable,
   InteractableCommand,
