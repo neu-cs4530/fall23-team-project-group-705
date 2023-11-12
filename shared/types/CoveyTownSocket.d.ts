@@ -142,8 +142,8 @@ export interface PictionaryMove {
  */
 export interface PictionaryGameState extends WinnableGameState {
   currentWord: string;
+  pastWords?: string[];
   drawer?: PlayerID;
-  guessers?: PlayerID[];
   scores?: Record<PlayerID,number>;
 }
 

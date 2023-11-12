@@ -1,5 +1,6 @@
 import InvalidParametersError, {
   GAME_NOT_IN_PROGRESS_MESSAGE,
+  GAME_STARTED_MESSAGE,
   MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
@@ -81,19 +82,15 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    *  or the game is full (GAME_FULL_MESSAGE)
    */
   protected _join(player: Player): void {
-    if (this._playerInGame(player.id)) {
+    if (this._players.includes(player)) {
       throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
-    }
-    if (!this.state.drawer) {
-      this.state = {
-        ...this.state,
-        drawer: player.id,
-      };
+    } else if (this.state.status !== 'WAITING_TO_START') {
+      throw new InvalidParametersError(GAME_STARTED_MESSAGE);
     } else {
-      this.state = {
-        ...this.state,
-        guessers: [player.id].concat(this.state.guessers !== undefined ? this.state.guessers : []),
-      };
+      if (this._players.length === 0) {
+        this.state.drawer = player.id;
+      }
+      this._players.push(player);
     }
   }
 
@@ -109,18 +106,19 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
    */
   protected _leave(player: Player): void {
-    if (!this._playerInGame(player.id)) {
+    if (!this._players.includes(player)) {
       throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
     }
 
-    // TODO: Implement leaving the game
-  }
-
-  private _playerInGame(playerID: PlayerID): boolean {
-    return (
-      this.state.drawer === playerID ||
-      (this.state.guessers !== undefined &&
-        this.state.guessers?.some(guesserID => guesserID === playerID))
-    );
+    if (this.state.drawer === player.id) {
+      const indexOfplayer: number = this._players.indexOf(player);
+      if (indexOfplayer !== -1 && indexOfplayer < this._players.length - 1) {
+        this.state.drawer = this._players[indexOfplayer + 1].id;
+        this._players.splice(indexOfplayer, 1);
+      } else {
+        const indexOfthisplayer: number = this._players.indexOf(player);
+        this._players.splice(indexOfthisplayer, 1);
+      }
+    }
   }
 }
