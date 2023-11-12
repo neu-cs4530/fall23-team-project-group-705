@@ -21,7 +21,6 @@ import {
 } from '../types/CoveyTownSocket';
 import { logError } from '../Utils';
 import ConversationArea from './ConversationArea';
-import PictionaryArea from './PictionaryArea';
 import GameAreaFactory from './games/GameAreaFactory';
 import InteractableArea from './InteractableArea';
 import ViewingArea from './ViewingArea';
@@ -298,35 +297,6 @@ export default class Town {
       return false;
     }
     area.topic = conversationArea.topic;
-    area.addPlayersWithinBounds(this._players);
-    this._broadcastEmitter.emit('interactableUpdate', area.toModel());
-    return true;
-  }
-
-  /**
-   * Creates a new pictionary area in this town if there is not currently an active
-   * pictionary with the same ID. The pictionary area ID must match the name of a
-   * pictionary area that exists in this town's map, and the pictionary area must not
-   * already have a topic set.
-   *
-   * If successful creating the pictionary area, this method:
-   *  Adds any players who are in the region defined by the pictionary area to it.
-   *  Notifies all players in the town that the pictionary area has been updated
-   *
-   * @param pictionaryArea Information describing the pictionary area to create. Ignores any
-   *  occupantsById that are set on the pictionary area that is passed to this method.
-   *
-   * @returns true if the pictionary is successfully created, or false if there is no known
-   * pictionary area with the specified ID or if there is already an active pictionary area
-   * with the specified ID
-   */
-  public addPictionaryArea(pictionaryArea: PictionaryAreaModel): boolean {
-    const area = this._interactables.find(
-      eachArea => eachArea.id === pictionaryArea.id,
-    ) as PictionaryArea;
-    if (!area) {
-      return false;
-    }
     area.addPlayersWithinBounds(this._players);
     this._broadcastEmitter.emit('interactableUpdate', area.toModel());
     return true;

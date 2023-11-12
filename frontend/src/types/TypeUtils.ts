@@ -6,6 +6,7 @@ import {
   DrawingArea,
   PictionaryArea,
   GameArea,
+  PictionaryGameState,
 } from './CoveyTownSocket';
 
 /**
@@ -32,7 +33,9 @@ export function isDrawingArea(interactable: Interactable): interactable is Drawi
 /**
  * Test to see if an interactable is a pictionary area
  */
-export function isPictionaryArea(interactable: Interactable): interactable is PictionaryArea {
+export function isPictionaryArea(
+  interactable: Interactable,
+): interactable is GameArea<PictionaryGameState> {
   return interactable.type === 'PictionaryArea';
 }
 

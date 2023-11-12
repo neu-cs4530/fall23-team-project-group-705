@@ -622,14 +622,20 @@
                  "y":1068.23340899987
                 }, 
                 {
-                 "height":100.844,
+                 "height":104.844,
                  "id":53,
                  "name":"Pictionary",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"Pictionary"
+                        }],
                  "rotation":0,
-                 "type":"PictionaryArea",
+                 "type":"GameArea",
                  "visible":true,
-                 "width":188.271,
-                 "x":3320.8645,
+                 "width":162.271,
+                 "x":3338.8645,
                  "y":692.22
                 }],
          "opacity":1,
