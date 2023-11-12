@@ -10,28 +10,29 @@ import {
   InteractableCommand,
   InteractableCommandReturnType,
   InteractableType,
-  TicTacToeGameState,
+  PictionaryGameState,
 } from '../../types/CoveyTownSocket';
 import GameArea from './GameArea';
-import TicTacToeGame from './TicTacToeGame';
+import PictionaryGame from './PictionaryGame';
 
 /**
- * A TicTacToeGameArea is a GameArea that hosts a TicTacToeGame.
- * @see TicTacToeGame
+ * A PictionaryGameArea is a GameArea that hosts a PictionaryGame.
+ * @see PictionaryGame
  * @see GameArea
  */
-export default class TicTacToeGameArea extends GameArea<TicTacToeGame> {
+export default class PictionaryGameArea extends GameArea<PictionaryGame> {
   protected getType(): InteractableType {
-    return 'TicTacToeArea';
+    return 'PictionaryArea';
   }
 
-  private _stateUpdated(updatedState: GameInstance<TicTacToeGameState>) {
+  private _stateUpdated(updatedState: GameInstance<PictionaryGameState>) {
     if (updatedState.state.status === 'OVER') {
       // If we haven't yet recorded the outcome, do so now.
       const gameID = this._game?.id;
       if (gameID && !this._history.find(eachResult => eachResult.gameID === gameID)) {
-        const { x, o } = updatedState.state;
-        if (x && o) {
+        const { scores } = updatedState.state;
+        if (scores) {
+          /*
           const xName = this._occupants.find(eachPlayer => eachPlayer.id === x)?.userName || x;
           const oName = this._occupants.find(eachPlayer => eachPlayer.id === o)?.userName || o;
           this._history.push({
@@ -41,6 +42,7 @@ export default class TicTacToeGameArea extends GameArea<TicTacToeGame> {
               [oName]: updatedState.state.winner === o ? 1 : 0,
             },
           });
+          */
         }
       }
     }
@@ -81,8 +83,8 @@ export default class TicTacToeGameArea extends GameArea<TicTacToeGame> {
       if (this._game?.id !== command.gameID) {
         throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
       }
-      // Check to ensure the movetype is TicTacToeMove
-      if (!('gamePiece' in command.move)) {
+      // Check to ensure the movetype is PictionaryMove
+      if (!('guesser' in command.move)) {
         throw new InvalidParametersError(GAME_COMMAND_MISSMATCH_MESSAGE);
       }
       game.applyMove({
@@ -97,7 +99,7 @@ export default class TicTacToeGameArea extends GameArea<TicTacToeGame> {
       let game = this._game;
       if (!game || game.state.status === 'OVER') {
         // No game in progress, make a new one
-        game = new TicTacToeGame();
+        game = new PictionaryGame();
         this._game = game;
       }
       game.join(player);

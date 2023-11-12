@@ -5,6 +5,7 @@ export const GAME_FULL_MESSAGE = 'Game is full';
 export const GAME_NOT_IN_PROGRESS_MESSAGE = 'Game is not in progress';
 export const GAME_OVER_MESSAGE = 'Game is over';
 export const GAME_ID_MISSMATCH_MESSAGE = 'Game ID mismatch';
+export const GAME_COMMAND_MISSMATCH_MESSAGE = 'Game command mismatch';
 
 export const BOARD_POSITION_NOT_EMPTY_MESSAGE = 'Board position is not empty';
 export const MOVE_NOT_YOUR_TURN_MESSAGE = 'Not your turn';

@@ -127,6 +127,26 @@ export interface TicTacToeGameState extends WinnableGameState {
   o?: PlayerID;
 }
 
+/**
+ * Type for a move in Pictionary
+ */
+export interface PictionaryMove {
+  guesser: PlayerID;
+  guessWord: string;
+}
+
+/**
+ * Type for the state of a Pictionary game
+ * The state of the game is represented as a word, and the playerIDs of the players 
+ * (the drawer and the guessers), and a map of scores.
+ */
+export interface PictionaryGameState extends WinnableGameState {
+  currentWord: string;
+  drawer?: PlayerID;
+  guessers?: PlayerID[];
+  scores?: Record<PlayerID,number>;
+}
+
 export type InteractableID = string;
 export type GameInstanceID = string;
 
@@ -182,7 +202,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<PictionaryMove> | LeaveGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;

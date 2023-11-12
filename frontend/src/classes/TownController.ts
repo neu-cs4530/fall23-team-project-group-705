@@ -569,17 +569,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   /**
-   * Create a new pictionary area, sending the request to the townService. Throws an error if the request
-   * is not successful. Does not immediately update local state about the new pictionary area - it will be
-   * updated once the townService creates the area and emits an interactableUpdate
-   *
-   * @param newArea
-   */
-  async createPictionaryArea(newArea: { id: string; occupants: Array<string> }) {
-    await this._townsService.createPictionaryArea(this.townID, this.sessionToken, newArea);
-  }
-
-  /**
    * Create a new viewing area, sending the request to the townService. Throws an error if the request
    * is not successful. Does not immediately update local state about the new viewing area - it will be
    * updated once the townService creates the area and emits an interactableUpdate
@@ -640,10 +629,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             );
           } else if (isPictionaryArea(eachInteractable)) {
             this._interactableControllers.push(
-              PictionaryAreaController.fromPictionaryAreaModel(
-                eachInteractable,
-                this._playersByIDs.bind(this),
-              ),
+              new PictionaryAreaController(eachInteractable.id, eachInteractable, this),
             );
           } else if (isTicTacToeArea(eachInteractable)) {
             this._interactableControllers.push(
