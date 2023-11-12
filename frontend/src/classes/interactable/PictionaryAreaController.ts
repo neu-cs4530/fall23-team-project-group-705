@@ -1,93 +1,119 @@
-import { useEffect, useState } from 'react';
-import { PictionaryArea as PictionaryAreaModel } from '../../types/CoveyTownSocket';
+import { GameArea, GameStatus, PictionaryGameState } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
-import InteractableAreaController, { BaseInteractableEventMap } from './InteractableAreaController';
+import GameAreaController, { GameEventTypes } from './GameAreaController';
 
-/**
- * The events that the PictionaryAreaController emits to subscribers. These events
- * are only ever emitted to local components (not to the townService).
- */
-export type PictionaryAreaEvents = BaseInteractableEventMap & {
-  boardChange: (newBoard: any | undefined) => void;
+export const PLAYER_NOT_IN_GAME_ERROR = 'Player is not in game';
+
+export const NO_GAME_IN_PROGRESS_ERROR = 'No game in progress';
+
+export type PictionaryEvents = GameEventTypes & {
+  wordChanged: (word: string) => void;
+  turnChanged: (isOurTurn: boolean) => void;
 };
 
 /**
- * A PictionaryAreaController manages the local behavior of a pictionary area in the frontend,
- * implementing the logic to bridge between the townService's interpretation of pictionary areas and the
- * frontend's. The PictionaryAreaController emits events when the pictionary area changes.
+ * This class is responsible for managing the state of the Tic Tac Toe game, and for sending commands to the server
  */
-export default class PictionaryAreaController extends InteractableAreaController<
-  PictionaryAreaEvents,
-  PictionaryAreaModel
+export default class PictionaryAreaController extends GameAreaController<
+  PictionaryGameState,
+  PictionaryEvents
 > {
-  // TODO: Define boardstate type
-  board: any = undefined;
+  protected _currentWord = '';
 
   /**
-   * Create a new PictionaryAreaController
-   * @param id
-   * @param topic
+   * Returns the current word being guessed.
    */
-  // constructor(id: string) {
-  //   super(id);
-  // }
+  get currentWord(): string {
+    return this._currentWord;
+  }
 
+  /**
+   * Returns the player who is drawing, or undefined otherwise
+   */
+  get drawer(): PlayerController | undefined {
+    const drawer = this._model.game?.state.drawer;
+    if (drawer) {
+      return this.occupants.find(eachOccupant => eachOccupant.id === drawer);
+    }
+    return undefined;
+  }
+
+  /**
+   * Returns the winner of the game, if there is one
+   */
+  get winner(): PlayerController | undefined {
+    const winner = this._model.game?.state.winner;
+    if (winner) {
+      return this.occupants.find(eachOccupant => eachOccupant.id === winner);
+    }
+    return undefined;
+  }
+
+  get isOurTurn(): boolean {
+    return this.drawer?.id === this._townController.ourPlayer.id;
+  }
+
+  /**
+   * Returns true if the current player is a player in this game
+   */
+  get isPlayer(): boolean {
+    return this._model.game?.players.includes(this._townController.ourPlayer.id) || false;
+  }
+
+  /**
+   * Returns the status of the game.
+   * Defaults to 'WAITING_TO_START' if the game is not in progress
+   */
+  get status(): GameStatus {
+    const status = this._model.game?.state.status;
+    if (!status) {
+      return 'WAITING_TO_START';
+    }
+    return status;
+  }
+
+  /**
+   * Returns true if the game is in progress
+   */
   public isActive(): boolean {
-    return this.occupants.length > 0;
-  }
-
-  protected _updateFrom(newModel: PictionaryAreaModel): void {
-    // TODO: Update the board
+    return this._model.game?.state.status === 'IN_PROGRESS';
   }
 
   /**
-   * A pictionary area is empty if there are no occupants in it, or the topic is undefined.
+   * Updates the internal state of this TicTacToeAreaController to match the new model.
+   *
+   * Calls super._updateFrom, which updates the occupants of this game area and
+   * other common properties (including this._model).
+   *
+   * If the board has changed, emits a 'boardChanged' event with the new board. If the board has not changed,
+   *  does not emit the event.
+   *
+   * If the turn has changed, emits a 'turnChanged' event with true if it is our turn, and false otherwise.
+   * If the turn has not changed, does not emit the event.
    */
-  isEmpty(): boolean {
-    return this.occupants.length === 0;
+  protected _updateFrom(newModel: GameArea<PictionaryGameState>): void {
+    console.log('_updateFrom called.');
   }
 
   /**
-   * Return a representation of this PictionaryAreaController that matches the
-   * townService's representation and is suitable for transmitting over the network.
+   * Sends a request to the server to make a move in the game
+   *
+   * If the game is not in progress, throws an error NO_GAME_IN_PROGRESS_ERROR
+   *
+   * @param guessWord the word that is being submitted as a guess.
    */
-  toInteractableAreaModel(): PictionaryAreaModel {
-    return {
-      id: this.id,
-      occupants: this.occupants.map(player => player.id),
-      type: 'PictionaryArea',
-    };
+  public async makeGuess(guessWord: string) {
+    const instanceID = this._instanceID;
+    if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
+      throw new Error(NO_GAME_IN_PROGRESS_ERROR);
+    }
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'GameMove',
+      gameID: instanceID,
+      move: {
+        guesser: this._townController.ourPlayer.id,
+        guessWord,
+      },
+    });
   }
-
-  /**
-   * Create a new PictionaryAreaController to match a given PictionaryAreaModel
-   * @param drawAreaModel Pictionary area to represent
-   * @param playerFinder A function that will return a list of PlayerController's
-   *                     matching a list of Player ID's
-   */
-  static fromPictionaryAreaModel(
-    drawAreaModel: PictionaryAreaModel,
-    playerFinder: (playerIDs: string[]) => PlayerController[],
-  ): PictionaryAreaController {
-    const ret = new PictionaryAreaController(drawAreaModel.id);
-    ret.occupants = playerFinder(drawAreaModel.occupants);
-    return ret;
-  }
-}
-
-/**
- * A react hook to retrieve the board of a PictionaryAreaController.
- * If there is currently no topic defined, it will return NO_TOPIC_STRING.
- *
- * This hook will re-render any components that use it when the topic changes.
- */
-export function usePictionaryAreaBoard(area: PictionaryAreaController): string {
-  const [board, setBoard] = useState(area.board);
-  useEffect(() => {
-    area.addListener('boardChange', setBoard);
-    return () => {
-      area.removeListener('boardChange', setBoard);
-    };
-  }, [area]);
-  return board;
 }
