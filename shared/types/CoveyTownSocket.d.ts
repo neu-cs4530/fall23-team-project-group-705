@@ -144,7 +144,6 @@ export interface PictionaryGameState extends WinnableGameState {
   currentWord: string;
   pastWords?: string[];
   drawer?: PlayerID;
-  players?: PlayerID[];
   scores?: Record<PlayerID,number>;
 }
 
