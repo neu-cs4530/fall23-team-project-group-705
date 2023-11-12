@@ -116,9 +116,6 @@ export interface TicTacToeMove {
   col: TicTacToeGridPosition;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PictionaryMove {
-}
 /**
  * Type for the state of a TicTacToe game
  * The state of the game is represented as a list of moves, and the playerIDs of the players (x and o)
