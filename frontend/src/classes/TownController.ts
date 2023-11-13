@@ -28,7 +28,7 @@ import {
 } from '../types/CoveyTownSocket';
 import {
   isConversationArea,
-  isDrawingArea,
+  isWhiteboardArea,
   isPictionaryArea,
   isTicTacToeArea,
   isViewingArea,
@@ -40,7 +40,7 @@ import InteractableAreaController, {
 } from './interactable/InteractableAreaController';
 import TicTacToeAreaController from './interactable/TicTacToeAreaController';
 import ViewingAreaController from './interactable/ViewingAreaController';
-import DrawingAreaController from './interactable/DrawingAreaController';
+import WhiteboardAreaController from './interactable/WhiteboardAreaController';
 import PictionaryAreaController from './interactable/PictionaryAreaController';
 import PlayerController from './PlayerController';
 
@@ -558,13 +558,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   /**
-   * Create a new drawing area, sending the request to the townService. Throws an error if the request
-   * is not successful. Does not immediately update local state about the new drawing area - it will be
+   * Create a new whiteboard area, sending the request to the townService. Throws an error if the request
+   * is not successful. Does not immediately update local state about the new whiteboard area - it will be
    * updated once the townService creates the area and emits an interactableUpdate
    *
    * @param newArea
    */
-  async createDrawingArea(newArea: { id: string; occupants: Array<string> }) {
+  async createWhiteboardArea(newArea: { id: string; occupants: Array<string> }) {
+    // create a whiteboard for the whiteboardArea
     await this._townsService.createConversationArea(this.townID, this.sessionToken, newArea);
   }
 
@@ -620,9 +621,9 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             );
           } else if (isViewingArea(eachInteractable)) {
             this._interactableControllers.push(new ViewingAreaController(eachInteractable));
-          } else if (isDrawingArea(eachInteractable)) {
+          } else if (isWhiteboardArea(eachInteractable)) {
             this._interactableControllers.push(
-              DrawingAreaController.fromDrawingAreaModel(
+              WhiteboardAreaController.fromWhiteboardAreaModel(
                 eachInteractable,
                 this._playersByIDs.bind(this),
               ),

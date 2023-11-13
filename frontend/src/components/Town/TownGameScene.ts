@@ -9,7 +9,7 @@ import ConversationArea from './interactables/ConversationArea';
 import GameArea from './interactables/GameArea';
 import Transporter from './interactables/Transporter';
 import ViewingArea from './interactables/ViewingArea';
-import DrawingArea from './interactables/Whiteboard/DrawingArea';
+import WhiteboardArea from './interactables/Whiteboard/WhiteboardArea';
 
 // Still not sure what the right type is here... "Interactable" doesn't do it
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,8 +22,8 @@ function interactableTypeForObjectType(type: string): any {
     return ViewingArea;
   } else if (type === 'GameArea') {
     return GameArea;
-  } else if (type === 'DrawingArea') {
-    return DrawingArea;
+  } else if (type === 'WhiteboardArea') {
+    return WhiteboardArea;
   } else {
     throw new Error(`Unknown object type: ${type}`);
   }

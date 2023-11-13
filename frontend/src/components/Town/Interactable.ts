@@ -7,7 +7,7 @@ export type KnownInteractableTypes =
   | 'viewingArea'
   | 'transporter'
   | 'gameArea'
-  | 'drawingArea'
+  | 'whiteboardArea'
   | 'pictionaryArea';
 
 /**

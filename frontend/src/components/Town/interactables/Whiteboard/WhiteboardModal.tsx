@@ -11,25 +11,25 @@ import { useInteractable } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import Whiteboard from './Whiteboard';
 
-export default function DrawingModal(): JSX.Element {
+export default function WhiteboardModal(): JSX.Element {
   const coveyTownController = useTownController();
-  const newDrawing = useInteractable('drawingArea');
+  const newWhiteboard = useInteractable('whiteboardArea');
 
-  const isOpen = newDrawing !== undefined;
+  const isOpen = newWhiteboard !== undefined;
 
   useEffect(() => {
-    if (newDrawing) {
+    if (newWhiteboard) {
       coveyTownController.pause();
     } else {
       coveyTownController.unPause();
     }
-  }, [coveyTownController, newDrawing]);
+  }, [coveyTownController, newWhiteboard]);
 
   const closeModal = useCallback(() => {
-    if (newDrawing) {
-      coveyTownController.interactEnd(newDrawing);
+    if (newWhiteboard) {
+      coveyTownController.interactEnd(newWhiteboard);
     }
-  }, [coveyTownController, newDrawing]);
+  }, [coveyTownController, newWhiteboard]);
 
   return (
     <Modal

@@ -6,7 +6,7 @@ import { Excalidraw } from '@excalidraw/excalidraw';
 export default function Whiteboard() {
   return (
     <>
-      <Box h={{ base: 'xs', lg: 'xl' }} w={['sm', 'xl', '6xl']}>
+      <Box h={'xl'} w={['sm', 'xl', '6xl']}>
         <Excalidraw />
       </Box>
     </>

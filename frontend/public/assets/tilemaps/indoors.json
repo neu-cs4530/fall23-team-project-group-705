@@ -581,7 +581,7 @@
                  "id":52,
                  "name":"Whiteboard",
                  "rotation":0,
-                 "type":"DrawingArea",
+                 "type":"WhiteboardArea",
                  "visible":true,
                  "width":188.271120353522,
                  "x":3105.48493302529,
