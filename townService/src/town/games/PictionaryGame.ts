@@ -1,4 +1,4 @@
-import { assert } from 'console';
+import * as fs from 'fs';
 import InvalidParametersError, {
   GAME_NOT_IN_PROGRESS_MESSAGE,
   GAME_STARTED_MESSAGE,
@@ -7,13 +7,8 @@ import InvalidParametersError, {
   PLAYER_NOT_IN_GAME_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
-import {
-  GameMove,
-  PictionaryGameState,
-  PictionaryMove,
-} from '../../types/CoveyTownSocket';
+import { GameMove, PictionaryGameState, PictionaryMove } from '../../types/CoveyTownSocket';
 import Game from './Game';
-import * as fs from 'fs';
 
 /**
  * A PictionaryGame is a Game that implements the rules of Pictionary.
@@ -26,7 +21,9 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       currentWord: '',
       status: 'WAITING_TO_START',
     });
-    this._wordlist = JSON.parse(JSON.stringify(fs.readFileSync("./PictionaryWordlist.json")))
+    this._wordlist = JSON.parse(
+      fs.readFileSync(`${__dirname}/PictionaryWordlist.json`, { encoding: 'ascii' }),
+    ) as string[];
     this.newWord();
   }
 
