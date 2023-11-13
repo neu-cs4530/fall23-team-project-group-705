@@ -29,6 +29,7 @@ import {
 import {
   isConversationArea,
   isDrawingArea,
+  isPictionaryArea,
   isTicTacToeArea,
   isViewingArea,
 } from '../types/TypeUtils';
@@ -40,6 +41,7 @@ import InteractableAreaController, {
 import TicTacToeAreaController from './interactable/TicTacToeAreaController';
 import ViewingAreaController from './interactable/ViewingAreaController';
 import DrawingAreaController from './interactable/DrawingAreaController';
+import PictionaryAreaController from './interactable/PictionaryAreaController';
 import PlayerController from './PlayerController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
@@ -624,6 +626,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
                 eachInteractable,
                 this._playersByIDs.bind(this),
               ),
+            );
+          } else if (isPictionaryArea(eachInteractable)) {
+            this._interactableControllers.push(
+              new PictionaryAreaController(eachInteractable.id, eachInteractable, this),
             );
           } else if (isTicTacToeArea(eachInteractable)) {
             this._interactableControllers.push(
