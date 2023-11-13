@@ -22,7 +22,13 @@ import PictionaryAreaController from '../../../../classes/interactable/Pictionar
 import PlayerController from '../../../../classes/PlayerController';
 import { useInteractable, useInteractableAreaController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
-import { GameResult, GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
+import {
+  GameResult,
+  GameStatus,
+  InteractableID,
+  PictionaryGameState,
+  PlayerID,
+} from '../../../../types/CoveyTownSocket';
 import GameAreaInteractable from '../GameArea';
 
 /**
@@ -145,6 +151,24 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       </b>
     );
   }
+
+  //to use it:  <EndGameScore scores={gameAreaController.score()} />;
+  const EndGameScore: React.FC<PictionaryGameState> = ({ scores }) => {
+    return (
+      <div>
+        <h1>End Game Scores</h1>
+        {scores ? (
+          <ul>
+            {(Object.entries(scores) as [PlayerID, number][]).map(([playerID, score]) => (
+              <li key={playerID}>{`Player ${playerID}: ${score}`}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>No scores available</p>
+        )}
+      </div>
+    );
+  };
 
   return (
     <Container>
