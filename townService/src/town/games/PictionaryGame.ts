@@ -1,3 +1,4 @@
+import { assert } from 'console';
 import InvalidParametersError, {
   GAME_NOT_IN_PROGRESS_MESSAGE,
   GAME_STARTED_MESSAGE,
@@ -10,23 +11,24 @@ import {
   GameMove,
   PictionaryGameState,
   PictionaryMove,
-  PlayerID,
 } from '../../types/CoveyTownSocket';
 import Game from './Game';
+import * as fs from 'fs';
 
 /**
- * A PictionaryGame is a Game that implements the rules of Tic Tac Toe.
- * @see https://en.wikipedia.org/wiki/Tic-tac-toe
+ * A PictionaryGame is a Game that implements the rules of Pictionary.
  */
 export default class PictionaryGame extends Game<PictionaryGameState, PictionaryMove> {
+  private _wordlist: string[];
+
   public constructor() {
     super({
       currentWord: '',
       status: 'WAITING_TO_START',
     });
+    this._wordlist = JSON.parse(JSON.stringify(fs.readFileSync("./PictionaryWordlist.json")))
+    this.newWord();
   }
-
-  private _currentWord = '';
 
   private _validateMove(move: PictionaryMove) {
     // A move is only valid if the player is not drawing
@@ -70,6 +72,27 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     const cleanMove: PictionaryMove = { guesser: '', guessWord: '' };
     this._validateMove(cleanMove);
     this._applyMove(cleanMove);
+  }
+
+  /**
+   * Selects a new, random word from the wordlist to be the currentWord.
+   */
+  public newWord(): void {
+    this._wordlist = this._wordlist.filter(word => word !== this.state.currentWord);
+    this.state = {
+      ...this.state,
+      pastWords: this.state.pastWords
+        ? this.state.pastWords.concat(this.state.currentWord)
+        : [this.state.currentWord],
+      currentWord: this._getNewWord(),
+    };
+  }
+
+  /**
+   * Gets a random new word that has not been seen in this game before from the wordlist.
+   */
+  private _getNewWord(): string {
+    return this._wordlist[Math.floor(Math.random() * this._wordlist.length)];
   }
 
   /**
