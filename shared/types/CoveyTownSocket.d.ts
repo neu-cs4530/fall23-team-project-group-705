@@ -141,7 +141,7 @@ export interface PictionaryMove {
  * currentWord: The word the drawer is drawing
  * pastWords: The words that have already come up this game
  * drawer: the ID of the player who is currently drawing
- * alreadyGuessedCorrectly: a lsit of the IDs of all the players who have already guessed correctly and scored for this round
+ * alreadyGuessedCorrectly: a lsit of the IDs of all the players who have already guessed correctly and scored for this turn
  * scores: a record of the score for each player who has scored.
  */
 export interface PictionaryGameState extends WinnableGameState {

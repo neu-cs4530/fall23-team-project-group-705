@@ -91,9 +91,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    * @throws InvalidParametersError if the move is invalid
    */
   public applyMove(move: GameMove<PictionaryMove>): void {
-    // TODO: Apply move
-
-    const cleanMove: PictionaryMove = { guesser: '', guessWord: '' };
+    const cleanMove: PictionaryMove = move.move;
     this._validateMove(cleanMove);
     this._applyMove(cleanMove);
   }
