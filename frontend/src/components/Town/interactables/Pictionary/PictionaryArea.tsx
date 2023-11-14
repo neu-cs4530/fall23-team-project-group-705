@@ -15,6 +15,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  UnorderedList,
   useToast,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -158,11 +159,11 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       <div>
         <h1>End Game Scores</h1>
         {scores ? (
-          <ul>
+          <UnorderedList>
             {(Object.entries(scores) as [PlayerID, number][]).map(([playerID, score]) => (
-              <li key={playerID}>{`Player ${playerID}: ${score}`}</li>
+              <ListItem key={playerID}>{`Player ${playerID}: ${score}`}</ListItem>
             ))}
-          </ul>
+          </UnorderedList>
         ) : (
           <p>No scores available</p>
         )}
