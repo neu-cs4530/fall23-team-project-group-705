@@ -1,14 +1,15 @@
-import * as fs from 'fs';
 import InvalidParametersError, {
   GAME_NOT_IN_PROGRESS_MESSAGE,
   GAME_STARTED_MESSAGE,
   MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
+  PLAYER_ALREADY_GUESSED_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import { GameMove, PictionaryGameState, PictionaryMove } from '../../types/CoveyTownSocket';
 import Game from './Game';
+import PictionaryWordlist from './PictionaryWordlist';
 
 /**
  * A PictionaryGame is a Game that implements the rules of Pictionary.
@@ -21,9 +22,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       currentWord: '',
       status: 'WAITING_TO_START',
     });
-    this._wordlist = JSON.parse(
-      fs.readFileSync(`${__dirname}/PictionaryWordlist.json`, { encoding: 'ascii' }),
-    ) as string[];
+    this._wordlist = PictionaryWordlist();
     this.newWord();
   }
 
@@ -36,10 +35,38 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     if (this.state.status !== 'IN_PROGRESS') {
       throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
     }
+    if (this.state.alreadyGuessedCorrectly?.some(pID => pID === move.guesser)) {
+      throw new InvalidParametersError(PLAYER_ALREADY_GUESSED_MESSAGE);
+    }
   }
 
   private _applyMove(move: PictionaryMove): void {
-    // TODO: Apply move
+    if(move.guessWord === this.state.currentWord) {
+      // Guess was correct
+
+      const newScores: Record<string, number> = this.state.scores ? this.state.scores : {};
+      if (newScores[move.guesser]) {
+        newScores[move.guesser] = newScores[move.guesser] + 1;
+      } else {
+        newScores[move.guesser] = 1;
+      }
+
+      let newAlreadyGuessedCorrectly: string[];
+      if (this.state.alreadyGuessedCorrectly) {
+        newAlreadyGuessedCorrectly = this.state.alreadyGuessedCorrectly;
+        newAlreadyGuessedCorrectly.push(move.guesser);
+      } else {
+        newAlreadyGuessedCorrectly = [move.guesser];
+      }
+
+      this.state = {
+        ...this.state,
+        alreadyGuessedCorrectly: newAlreadyGuessedCorrectly,
+        scores: newScores,
+      }
+    } else {
+      // Guess was incorrect
+    }
   }
 
   /*
@@ -86,6 +113,16 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   }
 
   /**
+   * Starts the game.
+   */
+  public startGame(): void {
+    this.state = {
+      ...this.state,
+      status: 'IN_PROGRESS',
+    };
+  }
+
+  /**
    * Gets a random new word that has not been seen in this game before from the wordlist.
    */
   private _getNewWord(): string {
@@ -108,9 +145,11 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       throw new InvalidParametersError(GAME_STARTED_MESSAGE);
     } else {
       if (this._players.length === 0) {
-        this.state.drawer = player.id;
+        this.state = {
+          ...this.state,
+          drawer: player.id,
+        }
       }
-      this._players.push(player);
     }
   }
 

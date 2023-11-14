@@ -8,6 +8,7 @@ import {
   Button,
   Container,
   Heading,
+  Input,
   List,
   ListItem,
   Modal,
@@ -15,6 +16,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  UnorderedList,
   useToast,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -61,18 +63,26 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   const townController = useTownController();
 
   const [history, setHistory] = useState<GameResult[]>(gameAreaController.history);
+  const [isPlayer, setIsPlayer] = useState<boolean>(gameAreaController.isPlayer);
   const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
   const [observers, setObservers] = useState<PlayerController[]>(gameAreaController.observers);
   const [joiningGame, setJoiningGame] = useState(false);
   const [drawer, setDrawer] = useState<PlayerController | undefined>(gameAreaController.drawer);
+  const [currentWord, setCurrentWord] = useState<string>(gameAreaController.currentWord);
+  const [guess, setGuess] = useState('');
   const toast = useToast();
+
+  
 
   useEffect(() => {
     const updateGameState = () => {
       setHistory(gameAreaController.history);
+      setIsPlayer(gameAreaController.isPlayer);
       setGameStatus(gameAreaController.status || 'WAITING_TO_START');
       setObservers(gameAreaController.observers);
       setDrawer(gameAreaController.drawer);
+      setCurrentWord(gameAreaController.currentWord);
+      console.log(`game state update, isPlayer: ${gameAreaController.isPlayer}`);
     };
     gameAreaController.addListener('gameUpdated', updateGameState);
     const onGameEnd = () => {
@@ -115,7 +125,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   } else {
     let joinGameButton = <></>;
     if (
-      (gameAreaController.status === 'WAITING_TO_START' && !gameAreaController.isPlayer) ||
+      (gameAreaController.status === 'WAITING_TO_START' && !isPlayer) ||
       gameAreaController.status === 'OVER'
     ) {
       joinGameButton = (
@@ -146,8 +156,39 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     );
   }
 
+  const guessButtonHandler = () => {
+    console.log(`guess button clicked with guess ${guess}`);
+  }
+
   return (
     <Container>
+      {/* This list is for displaying testing/development info */}
+      <UnorderedList>
+        <ListItem>Current Word: {currentWord}</ListItem>
+        <ListItem>
+          Guess box:
+          <Input 
+            placeholder='Type your guess here' 
+            value={guess} 
+            onChange={event => setGuess(event.target.value)} 
+          />
+          <Button 
+            onClick={async () => {
+              try {
+                await gameAreaController.makeGuess(guess);
+              } catch (e) {
+                toast({
+                  title: 'Error making guess',
+                  description: (e as Error).toString(),
+                  status: 'error',
+                });
+              }
+            }}>
+              Guess
+          </Button>
+        </ListItem>
+      </ UnorderedList>
+      
       <Accordion allowToggle>
         <AccordionItem>
           <Heading as='h3'>

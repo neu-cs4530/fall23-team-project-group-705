@@ -1,11 +1,9 @@
-import * as fs from 'fs';
 import PictionaryGame from './PictionaryGame';
+import PictionaryWordlist from './PictionaryWordlist';
 
 describe('PictionaryGame', () => {
   let game: PictionaryGame;
-  const wordlist: string[] = JSON.parse(
-    fs.readFileSync(`${__dirname}/PictionaryWordlist.json`, { encoding: 'ascii' }),
-  ) as string[];
+  const wordlist: string[] = PictionaryWordlist();
 
   beforeEach(() => {
     game = new PictionaryGame();

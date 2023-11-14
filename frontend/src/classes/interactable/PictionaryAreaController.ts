@@ -18,13 +18,22 @@ export default class PictionaryAreaController extends GameAreaController<
   PictionaryGameState,
   PictionaryEvents
 > {
-  protected _currentWord = '';
 
   /**
    * Returns the current word being guessed.
    */
   get currentWord(): string {
-    return this._currentWord;
+    // If the game is not started and this field is accessed, should I throw an error like this:
+    // if (!this._model.game) {
+    //   throw Error(NO_GAME_IN_PROGRESS_ERROR);
+    // }
+
+    // Or should I just return a default value like this?
+    if (!this._model.game) {
+      return '';
+    }
+
+    return this._model.game.state.currentWord;
   }
 
   /**
@@ -92,7 +101,7 @@ export default class PictionaryAreaController extends GameAreaController<
    * If the turn has not changed, does not emit the event.
    */
   protected _updateFrom(newModel: GameArea<PictionaryGameState>): void {
-    console.log('_updateFrom called.');
+    super._updateFrom(newModel);
   }
 
   /**
