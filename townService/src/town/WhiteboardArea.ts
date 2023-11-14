@@ -71,7 +71,7 @@ export default class WhiteboardArea extends InteractableArea {
   ): WhiteboardArea {
     const { name, width, height } = mapObject;
     if (!width || !height) {
-      throw new Error(`Malformed viewing area ${name}`);
+      throw new Error(`Malformed whiteboard area ${name}`);
     }
     const rect: BoundingBox = { x: mapObject.x, y: mapObject.y, width, height };
     return new WhiteboardArea({ id: name, occupants: [] }, rect, broadcastEmitter);

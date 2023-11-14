@@ -43,6 +43,7 @@ import ViewingAreaController from './interactable/ViewingAreaController';
 import WhiteboardAreaController from './interactable/WhiteboardAreaController';
 import PictionaryAreaController from './interactable/PictionaryAreaController';
 import PlayerController from './PlayerController';
+import WhiteboardArea from '../components/Town/interactables/Whiteboard/WhiteboardArea';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -565,7 +566,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * @param newArea
    */
   async createWhiteboardArea(newArea: { id: string; occupants: Array<string> }) {
-    // create a whiteboard for the whiteboardArea
+    // TODO: create a whiteboard for the whiteboardArea
     await this._townsService.createConversationArea(this.townID, this.sessionToken, newArea);
   }
 
@@ -623,10 +624,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             this._interactableControllers.push(new ViewingAreaController(eachInteractable));
           } else if (isWhiteboardArea(eachInteractable)) {
             this._interactableControllers.push(
-              WhiteboardAreaController.fromWhiteboardAreaModel(
-                eachInteractable,
-                this._playersByIDs.bind(this),
-              ),
+              new WhiteboardAreaController(eachInteractable.id, eachInteractable, this),
             );
           } else if (isPictionaryArea(eachInteractable)) {
             this._interactableControllers.push(
@@ -649,6 +647,17 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     });
   }
 
+  public getWhiteboardAreaController(whiteboardArea: WhiteboardArea): WhiteboardAreaController {
+    const existingController = this._interactableControllers.find(
+      eachExistingArea => eachExistingArea.id === whiteboardArea.id,
+    );
+    if (existingController instanceof WhiteboardAreaController) {
+      return existingController;
+    } else {
+      throw new Error(`No such whiteboard area controller ${existingController}`);
+    }
+  }
+
   /**
    * Retrieve the viewing area controller that corresponds to a viewingAreaModel, creating one if necessary
    *
@@ -669,6 +678,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   public getConversationAreaController(
     converationArea: ConversationArea,
   ): ConversationAreaController {
+    console.log(this._interactableControllers);
     const existingController = this._interactableControllers.find(
       eachExistingArea => eachExistingArea.id === converationArea.name,
     );

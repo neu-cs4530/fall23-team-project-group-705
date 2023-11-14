@@ -202,7 +202,18 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<PictionaryMove> | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<PictionaryMove> | LeaveGameCommand | WhiteboardCommand;
+
+export type WhiteboardCommand = WhiteboardJoin | WhiteboardLeave
+
+export type WhiteboardJoin = {
+  type: 'WhiteboardJoin'
+}
+
+export type WhiteboardLeave = {
+  type: 'WhiteboardLeave'
+}
+
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;

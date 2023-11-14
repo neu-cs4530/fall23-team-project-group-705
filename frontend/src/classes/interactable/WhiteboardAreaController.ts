@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
 import { WhiteboardArea as WhiteboardAreaModel } from '../../types/CoveyTownSocket';
-import PlayerController from '../PlayerController';
+import TownController from '../TownController';
 import InteractableAreaController, { BaseInteractableEventMap } from './InteractableAreaController';
 
 /**
@@ -21,16 +20,22 @@ export default class WhiteboardAreaController extends InteractableAreaController
   WhiteboardAreaModel
 > {
   // TODO: Define boardstate type
-  board: any = undefined;
+  private _board: any = undefined;
+
+  private _model: WhiteboardAreaModel;
+
+  private _townController: TownController;
 
   /**
    * Create a new WhiteboardAreaController
    * @param id
    * @param topic
    */
-  // constructor(id: string) {
-  //   super(id);
-  // }
+  constructor(id: string, model: WhiteboardAreaModel, townController: TownController) {
+    super(id);
+    this._model = model;
+    this._townController = townController;
+  }
 
   public isActive(): boolean {
     return this.occupants.length > 0;
@@ -59,35 +64,15 @@ export default class WhiteboardAreaController extends InteractableAreaController
     };
   }
 
-  /**
-   * Create a new WhiteboardAreaController to match a given WhiteboardAreaModel
-   * @param drawAreaModel Whiteboard area to represent
-   * @param playerFinder A function that will return a list of PlayerController's
-   *                     matching a list of Player ID's
-   */
-  static fromWhiteboardAreaModel(
-    whiteboardAreaModel: WhiteboardAreaModel,
-    playerFinder: (playerIDs: string[]) => PlayerController[],
-  ): WhiteboardAreaController {
-    const ret = new WhiteboardAreaController(whiteboardAreaModel.id);
-    ret.occupants = playerFinder(whiteboardAreaModel.occupants);
-    return ret;
+  public async leaveArea() {
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'WhiteboardLeave',
+    });
   }
-}
 
-/**
- * A react hook to retrieve the board of a WhiteboardAreaController.
- * If there is currently no topic defined, it will return NO_TOPIC_STRING.
- *
- * This hook will re-render any components that use it when the topic changes.
- */
-export function useWhiteboardArea(area: WhiteboardAreaController): string {
-  const [board, setBoard] = useState(area.board);
-  useEffect(() => {
-    area.addListener('boardChange', setBoard);
-    return () => {
-      area.removeListener('boardChange', setBoard);
-    };
-  }, [area]);
-  return board;
+  public async joinArea() {
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'WhiteboardJoin',
+    });
+  }
 }
