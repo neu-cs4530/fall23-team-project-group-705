@@ -26,6 +26,9 @@ import PictionaryGame from './PictionaryGame';
 export default class PictionaryGameArea extends GameArea<PictionaryGame> {
   public constructor(id: string, { x, y, width, height }: BoundingBox, townEmitter: TownEmitter) {
     super(id, { x, y, width, height }, townEmitter);
+    setTimeout(() => {
+      this.tick();
+    }, 1000);
   }
 
   protected getType(): InteractableType {
@@ -141,5 +144,22 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
       return undefined as InteractableCommandReturnType<CommandType>;
     }
     throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
+  }
+
+  // Ticks the game forwards by one second, updating both back and frontend.
+  private tick(): void {
+    if (this._game !== undefined) {
+      this._game.tick();
+      this._stateUpdated(this._game.toModel());
+    }
+
+    /*
+     * Sets up the next tick for a second from now.
+     * Ideally we should not have to use recursion, but for some reason calling this function with setInterval,
+     * which would let us avoid recursion, means that this._game is read as undefined even after is has been updated.
+     */
+    setTimeout(() => {
+      this.tick();
+    }, 1000);
   }
 }

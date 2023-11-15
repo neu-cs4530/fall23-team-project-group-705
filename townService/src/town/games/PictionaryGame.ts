@@ -7,6 +7,7 @@ import InvalidParametersError, {
   PLAYER_ALREADY_GUESSED_MESSAGE,
   DRAWER_UNDEFINED_MESSAGE,
   DRAWER_NOT_IN_GAME_MESSAGE,
+  TURN_ENDED_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import { GameMove, PictionaryGameState, PictionaryMove } from '../../types/CoveyTownSocket';
@@ -18,6 +19,11 @@ import PICTIONARY_WORDLIST from './PictionaryWordlist';
  */
 export default class PictionaryGame extends Game<PictionaryGameState, PictionaryMove> {
   private _wordlist: string[];
+
+  // The length, in seconds. of one drawer's turn.
+  private static TURN_LENGTH: number = 30;
+  // The length, in seconds, between turns.
+  private static INTERMISSION_LENGTH: number = 5;
 
   public constructor() {
     super({
@@ -40,6 +46,9 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     }
     if (this.state.alreadyGuessedCorrectly?.some(pID => pID === move.guesser)) {
       throw new InvalidParametersError(PLAYER_ALREADY_GUESSED_MESSAGE);
+    }
+    if (this.state.betweenTurns) {
+      throw new InvalidParametersError(TURN_ENDED_MESSAGE);
     }
   }
 
@@ -68,7 +77,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
         scores: newScores,
       };
 
-      // Check for turn end
+      // TODO: Check for turn end
     } else {
       // Guess was incorrect
     }
@@ -128,9 +137,39 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   }
 
   /**
-   * A function meant to be called by setInterval once a second. Updates game timer and handles turn changes.
+   * A function meant to be called once a second. Updates game timer and handles turn changes.
    */
-  public tick(): void {}
+  public tick(): void {
+    if(this.state.status === 'IN_PROGRESS') {
+      let timer = this.state.timer + 1;
+      let betweenTurns: boolean;
+
+      if(this.state.betweenTurns) {
+        // In an intermission
+        if (timer > PictionaryGame.INTERMISSION_LENGTH) {
+          this.nextTurn();
+          betweenTurns = false;
+          timer = 0;
+        } else {
+          betweenTurns = true;
+        }
+      } else {
+        // In a turn
+        if (timer > PictionaryGame.TURN_LENGTH) {
+          betweenTurns = true;
+          timer = 0;
+        } else {
+          betweenTurns = false;
+        }
+      }
+      
+      this.state = {
+        ...this.state,
+        timer,
+        betweenTurns,
+      }
+    }
+  }
 
   /**
    * Gets a random new word that has not been seen in this game before from the wordlist.

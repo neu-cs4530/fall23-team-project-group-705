@@ -75,6 +75,8 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   const [joiningGame, setJoiningGame] = useState(false);
   const [drawer, setDrawer] = useState<PlayerController | undefined>(gameAreaController.drawer);
   const [currentWord, setCurrentWord] = useState<string>(gameAreaController.currentWord);
+  const [timer, setTimer] = useState(gameAreaController.timer);
+  const [betweenTurns, setBetweenTurns] = useState(gameAreaController.betweenTurns);
   const [guess, setGuess] = useState('');
   const toast = useToast();
 
@@ -86,6 +88,8 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       setObservers(gameAreaController.observers);
       setDrawer(gameAreaController.drawer);
       setCurrentWord(gameAreaController.currentWord);
+      setBetweenTurns(gameAreaController.betweenTurns);
+      setTimer(gameAreaController.timer);
       console.log(`game state update, isPlayer: ${gameAreaController.isPlayer}`);
     };
     gameAreaController.addListener('gameUpdated', updateGameState);
@@ -225,6 +229,9 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
             }}>
             Start
           </Button>
+          <ListItem>
+            BetweenTurns?: {betweenTurns ? 'true' : 'false'}, Timer: {timer} 
+          </ListItem>
         </ListItem>
       </UnorderedList>
       <Accordion allowToggle>

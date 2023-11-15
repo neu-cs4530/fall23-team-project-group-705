@@ -21,17 +21,22 @@ export default class PictionaryAreaController extends GameAreaController<
    * Returns the current word being guessed.
    */
   get currentWord(): string {
-    // If the game is not started and this field is accessed, should I throw an error like this:
-    // if (!this._model.game) {
-    //   throw Error(NO_GAME_IN_PROGRESS_ERROR);
-    // }
-
-    // Or should I just return a default value like this?
     if (!this._model.game) {
       return '';
     }
 
     return this._model.game.state.currentWord;
+  }
+
+  /**
+   * Returns the current value of the timer, in seconds.
+   */
+  get timer(): number {
+    if (!this._model.game) {
+      return 0;
+    }
+
+    return this._model.game.state.timer;
   }
 
   /**
@@ -77,6 +82,14 @@ export default class PictionaryAreaController extends GameAreaController<
       return 'WAITING_TO_START';
     }
     return status;
+  }
+
+  get betweenTurns(): boolean {
+    const betweenTurns = this._model.game?.state.betweenTurns;
+    if (!betweenTurns) {
+      return false;
+    }
+    return betweenTurns;
   }
 
   /**
