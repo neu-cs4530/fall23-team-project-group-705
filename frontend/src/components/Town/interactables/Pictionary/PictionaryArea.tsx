@@ -162,11 +162,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     );
   }
 
-<<<<<<< HEAD
-  const guessButtonHandler = () => {
-    console.log(`guess button clicked with guess ${guess}`);
-  }
-=======
   //to use it:  <EndGameScore scores={gameAreaController.score()} />;
   const EndGameScore: React.FC<PictionaryGameState> = ({ scores }) => {
     return (
@@ -184,7 +179,10 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       </div>
     );
   };
->>>>>>> main
+
+  const guessButtonHandler = () => {
+    console.log(`guess button clicked with guess ${guess}`);
+  }
 
   return (
     <Container>
@@ -232,7 +230,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
         </ListItem>
       </ UnorderedList>
       
-      <Accordion allowToggle>
+ s      <Accordion allowToggle>
         <AccordionItem>
           <Heading as='h3'>
             <AccordionButton>
