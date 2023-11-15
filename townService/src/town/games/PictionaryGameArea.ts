@@ -12,6 +12,8 @@ import {
   InteractableCommandReturnType,
   InteractableType,
   PictionaryGameState,
+  BoundingBox,
+  TownEmitter,
 } from '../../types/CoveyTownSocket';
 import GameArea from './GameArea';
 import PictionaryGame from './PictionaryGame';
@@ -22,6 +24,11 @@ import PictionaryGame from './PictionaryGame';
  * @see GameArea
  */
 export default class PictionaryGameArea extends GameArea<PictionaryGame> {
+
+  public constructor(id: string, { x, y, width, height }: BoundingBox, townEmitter: TownEmitter) {
+    super(id, { x, y, width, height }, townEmitter);
+  }
+
   protected getType(): InteractableType {
     return 'PictionaryArea';
   }

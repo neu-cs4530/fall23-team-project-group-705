@@ -146,6 +146,8 @@ export interface PictionaryMove {
  */
 export interface PictionaryGameState extends WinnableGameState {
   currentWord: string;
+  timer: number;
+  betweenTurns?: boolean;
   pastWords?: string[];
   drawer?: PlayerID;
   alreadyGuessedCorrectly?: PlayerID[];

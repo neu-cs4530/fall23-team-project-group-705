@@ -20,6 +20,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   public constructor() {
     super({
       currentWord: '',
+      timer: 0,
       status: 'WAITING_TO_START',
     });
     this._wordlist = PictionaryWordlist;
@@ -119,8 +120,17 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     this.state = {
       ...this.state,
       status: 'IN_PROGRESS',
+      timer: 0,
+      betweenTurns: false,
     };
   }
+
+    /**
+   * A function meant to be called by setInterval once a second. Updates game timer and handles turn changes.
+   */
+    public tick(): void {
+
+    }
 
   /**
    * Gets a random new word that has not been seen in this game before from the wordlist.
@@ -167,6 +177,13 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   protected _leave(player: Player): void {
     if (!this._players.includes(player)) {
       throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
+    }
+
+    if(this._players.length === 1) {
+      this.state = {
+        ...this.state,
+        status: 'OVER',
+      }
     }
 
     if (this.state.drawer === player.id) {
