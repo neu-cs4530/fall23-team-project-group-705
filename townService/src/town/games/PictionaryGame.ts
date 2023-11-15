@@ -4,29 +4,30 @@ import InvalidParametersError, {
   MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
+  PLAYER_ALREADY_GUESSED_MESSAGE,
+  DRAWER_UNDEFINED_MESSAGE,
+  DRAWER_NOT_IN_GAME_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
-import {
-  GameMove,
-  PictionaryGameState,
-  PictionaryMove,
-  PlayerID,
-} from '../../types/CoveyTownSocket';
+import { GameMove, PictionaryGameState, PictionaryMove } from '../../types/CoveyTownSocket';
 import Game from './Game';
+import PICTIONARY_WORDLIST from './PictionaryWordlist';
 
 /**
- * A PictionaryGame is a Game that implements the rules of Tic Tac Toe.
- * @see https://en.wikipedia.org/wiki/Tic-tac-toe
+ * A PictionaryGame is a Game that implements the rules of Pictionary.
  */
 export default class PictionaryGame extends Game<PictionaryGameState, PictionaryMove> {
+  private _wordlist: string[];
+
   public constructor() {
     super({
       currentWord: '',
+      timer: 0,
       status: 'WAITING_TO_START',
     });
+    this._wordlist = PICTIONARY_WORDLIST;
+    this.newWord();
   }
-
-  private _currentWord = '';
 
   private _validateMove(move: PictionaryMove) {
     // A move is only valid if the player is not drawing
@@ -37,10 +38,40 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     if (this.state.status !== 'IN_PROGRESS') {
       throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
     }
+    if (this.state.alreadyGuessedCorrectly?.some(pID => pID === move.guesser)) {
+      throw new InvalidParametersError(PLAYER_ALREADY_GUESSED_MESSAGE);
+    }
   }
 
   private _applyMove(move: PictionaryMove): void {
-    // TODO: Apply move
+    if (move.guessWord === this.state.currentWord) {
+      // Guess was correct
+
+      const newScores: Record<string, number> = this.state.scores ? this.state.scores : {};
+      if (newScores[move.guesser]) {
+        newScores[move.guesser] += 1;
+      } else {
+        newScores[move.guesser] = 1;
+      }
+
+      let newAlreadyGuessedCorrectly: string[];
+      if (this.state.alreadyGuessedCorrectly) {
+        newAlreadyGuessedCorrectly = this.state.alreadyGuessedCorrectly;
+        newAlreadyGuessedCorrectly.push(move.guesser);
+      } else {
+        newAlreadyGuessedCorrectly = [move.guesser];
+      }
+
+      this.state = {
+        ...this.state,
+        alreadyGuessedCorrectly: newAlreadyGuessedCorrectly,
+        scores: newScores,
+      };
+
+      // Check for turn end
+    } else {
+      // Guess was incorrect
+    }
   }
 
   /*
@@ -65,11 +96,47 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    * @throws InvalidParametersError if the move is invalid
    */
   public applyMove(move: GameMove<PictionaryMove>): void {
-    // TODO: Apply move
-
-    const cleanMove: PictionaryMove = { guesser: '', guessWord: '' };
+    const cleanMove: PictionaryMove = move.move;
     this._validateMove(cleanMove);
     this._applyMove(cleanMove);
+  }
+
+  /**
+   * Selects a new, random word from the wordlist to be the currentWord.
+   */
+  public newWord(): void {
+    this._wordlist = this._wordlist.filter(word => word !== this.state.currentWord);
+    this.state = {
+      ...this.state,
+      pastWords: this.state.pastWords
+        ? this.state.pastWords.concat(this.state.currentWord)
+        : [this.state.currentWord],
+      currentWord: this._getNewWord(),
+    };
+  }
+
+  /**
+   * Starts the game.
+   */
+  public startGame(): void {
+    this.state = {
+      ...this.state,
+      status: 'IN_PROGRESS',
+      timer: 0,
+      betweenTurns: false,
+    };
+  }
+
+  /**
+   * A function meant to be called by setInterval once a second. Updates game timer and handles turn changes.
+   */
+  public tick(): void {}
+
+  /**
+   * Gets a random new word that has not been seen in this game before from the wordlist.
+   */
+  private _getNewWord(): string {
+    return this._wordlist[Math.floor(Math.random() * this._wordlist.length)];
   }
 
   /**
@@ -84,13 +151,15 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   protected _join(player: Player): void {
     if (this._players.includes(player)) {
       throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
-    } else if (this.state.status !== 'WAITING_TO_START') {
+    }
+    if (this.state.status !== 'WAITING_TO_START') {
       throw new InvalidParametersError(GAME_STARTED_MESSAGE);
-    } else {
-      if (this._players.length === 0) {
-        this.state.drawer = player.id;
-      }
-      this._players.push(player);
+    }
+    if (this._players.length === 0) {
+      this.state = {
+        ...this.state,
+        drawer: player.id,
+      };
     }
   }
 
@@ -110,6 +179,13 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
     }
 
+    if (this._players.length === 1) {
+      this.state = {
+        ...this.state,
+        status: 'OVER',
+      };
+    }
+
     if (this.state.drawer === player.id) {
       const indexOfplayer: number = this._players.indexOf(player);
       if (indexOfplayer !== -1 && indexOfplayer < this._players.length - 1) {
@@ -123,7 +199,14 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   }
 
   private _findDrawer(): Player {
-    return this._players.find(player => player.id === this.state.drawer)!;
+    if (!this.state.drawer) {
+      throw new Error(DRAWER_UNDEFINED_MESSAGE);
+    }
+    const drawer = this._players.find(player => player.id === this.state.drawer);
+    if (!drawer) {
+      throw new Error(DRAWER_NOT_IN_GAME_MESSAGE);
+    }
+    return drawer;
   }
 
   public nextTurn(): void {

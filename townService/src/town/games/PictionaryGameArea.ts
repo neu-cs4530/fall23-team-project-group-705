@@ -1,6 +1,7 @@
 import InvalidParametersError, {
   GAME_ID_MISSMATCH_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
+  GAME_ALREADY_IN_PROGRESS_MESSAGE,
   INVALID_COMMAND_MESSAGE,
   GAME_COMMAND_MISSMATCH_MESSAGE,
 } from '../../lib/InvalidParametersError';
@@ -11,6 +12,8 @@ import {
   InteractableCommandReturnType,
   InteractableType,
   PictionaryGameState,
+  BoundingBox,
+  TownEmitter,
 } from '../../types/CoveyTownSocket';
 import GameArea from './GameArea';
 import PictionaryGame from './PictionaryGame';
@@ -21,6 +24,10 @@ import PictionaryGame from './PictionaryGame';
  * @see GameArea
  */
 export default class PictionaryGameArea extends GameArea<PictionaryGame> {
+  public constructor(id: string, { x, y, width, height }: BoundingBox, townEmitter: TownEmitter) {
+    super(id, { x, y, width, height }, townEmitter);
+  }
+
   protected getType(): InteractableType {
     return 'PictionaryArea';
   }
@@ -115,6 +122,21 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
         throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
       }
       game.leave(player);
+      this._stateUpdated(game.toModel());
+      return undefined as InteractableCommandReturnType<CommandType>;
+    }
+    if (command.type === 'StartGame') {
+      const game = this._game;
+      if (!game) {
+        throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+      }
+      if (this._game?.state.status === 'IN_PROGRESS') {
+        throw new InvalidParametersError(GAME_ALREADY_IN_PROGRESS_MESSAGE);
+      }
+      if (this._game?.id !== command.gameID) {
+        throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
+      }
+      game.startGame();
       this._stateUpdated(game.toModel());
       return undefined as InteractableCommandReturnType<CommandType>;
     }
