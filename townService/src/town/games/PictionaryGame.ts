@@ -190,10 +190,6 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       const indexOfplayer: number = this._players.indexOf(player);
       if (indexOfplayer !== -1 && indexOfplayer < this._players.length - 1) {
         this.state.drawer = this._players[indexOfplayer + 1].id;
-        this._players.splice(indexOfplayer, 1);
-      } else {
-        const indexOfthisplayer: number = this._players.indexOf(player);
-        this._players.splice(indexOfthisplayer, 1);
       }
     }
   }
