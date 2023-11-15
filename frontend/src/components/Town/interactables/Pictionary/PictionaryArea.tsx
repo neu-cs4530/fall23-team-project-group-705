@@ -15,6 +15,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  UnorderedList,
   useToast,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -22,7 +23,13 @@ import PictionaryAreaController from '../../../../classes/interactable/Pictionar
 import PlayerController from '../../../../classes/PlayerController';
 import { useInteractable, useInteractableAreaController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
-import { GameResult, GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
+import {
+  GameResult,
+  GameStatus,
+  InteractableID,
+  PictionaryGameState,
+  PlayerID,
+} from '../../../../types/CoveyTownSocket';
 import GameAreaInteractable from '../GameArea';
 
 /**
@@ -145,6 +152,24 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       </b>
     );
   }
+
+  //to use it:  <EndGameScore scores={gameAreaController.score()} />;
+  const EndGameScore: React.FC<PictionaryGameState> = ({ scores }) => {
+    return (
+      <div>
+        <h1>End Game Scores</h1>
+        {scores ? (
+          <UnorderedList>
+            {(Object.entries(scores) as [PlayerID, number][]).map(([playerID, score]) => (
+              <ListItem key={playerID}>{`Player ${playerID}: ${score}`}</ListItem>
+            ))}
+          </UnorderedList>
+        ) : (
+          <p>No scores available</p>
+        )}
+      </div>
+    );
+  };
 
   return (
     <Container>

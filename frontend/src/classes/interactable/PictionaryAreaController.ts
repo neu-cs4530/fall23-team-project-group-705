@@ -1,4 +1,4 @@
-import { GameArea, GameStatus, PictionaryGameState } from '../../types/CoveyTownSocket';
+import { GameArea, GameStatus, PictionaryGameState, PlayerID } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
 import GameAreaController, { GameEventTypes } from './GameAreaController';
 
@@ -77,6 +77,10 @@ export default class PictionaryAreaController extends GameAreaController<
    */
   public isActive(): boolean {
     return this._model.game?.state.status === 'IN_PROGRESS';
+  }
+
+  get score(): Record<PlayerID, number> | undefined {
+    return this._model.game?.state.scores;
   }
 
   /**
