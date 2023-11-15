@@ -7,11 +7,16 @@ import {
   InteractableCommand,
   InteractableCommandReturnType,
   TownEmitter,
+  WhiteboardServerResponse,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
 
 export default class WhiteboardArea extends InteractableArea {
-  /** The drawong area is "active" when there are players inside of it  */
+  private _drawer: Player | undefined;
+
+  private _viewers: Player[] = [];
+
+  /** The whiteboard area is "active" when there are players inside of it  */
   public get isActive(): boolean {
     return this._occupants.length > 0;
   }
@@ -56,6 +61,8 @@ export default class WhiteboardArea extends InteractableArea {
       id: this.id,
       occupants: this.occupantsByID,
       type: 'WhiteboardArea',
+      drawer: this._drawer,
+      viewers: this._viewers,
     };
   }
 
@@ -74,12 +81,116 @@ export default class WhiteboardArea extends InteractableArea {
       throw new Error(`Malformed whiteboard area ${name}`);
     }
     const rect: BoundingBox = { x: mapObject.x, y: mapObject.y, width, height };
-    return new WhiteboardArea({ id: name, occupants: [] }, rect, broadcastEmitter);
+    return new WhiteboardArea(
+      { id: name, occupants: [], viewers: [], drawer: undefined },
+      rect,
+      broadcastEmitter,
+    );
   }
 
-  public handleCommand<
-    CommandType extends InteractableCommand,
-  >(): InteractableCommandReturnType<CommandType> {
-    throw new InvalidParametersError('Unknown command type');
+  public handleCommand<CommandType extends InteractableCommand>(
+    command: CommandType,
+    player: Player,
+  ): InteractableCommandReturnType<CommandType> {
+    if (command.type === 'WhiteboardJoin') {
+      this._handleWhiteboardJoin(player);
+    }
+
+    if (command.type === 'WhiteboardLeave') {
+      this._handleWhiteboardLeave(player);
+    }
+    return undefined as InteractableCommandReturnType<CommandType>;
+  }
+
+  private _handleWhiteboardJoin(player: Player) {
+    let isDrawer: boolean;
+
+    if (this._drawer === undefined) {
+      this._drawer = player;
+      isDrawer = true;
+    } else {
+      this._viewers.push(player);
+      isDrawer = false;
+    }
+
+    this._emitWhiteboardEvent({
+      type: 'WhiteboardPlayerJoin',
+      player: {
+        id: player.id,
+        userName: player.userName,
+      },
+      isDrawer,
+      drawer: this._drawer && {
+        id: this._drawer.id,
+        userName: this._drawer.userName,
+      },
+      viewers: this._viewers.map(viewer => ({
+        id: viewer.id,
+        userName: viewer.userName,
+      })),
+    });
+  }
+
+  private _handleWhiteboardLeave(player: Player) {
+    if (this._drawer !== undefined && this._drawer.id === player.id) {
+      this._drawer = undefined;
+      if (this._viewers.length > 0) {
+        this._drawer = this._viewers.shift();
+      }
+
+      this._emitWhiteboardEvent({
+        type: 'WhiteboardPlayerLeave',
+        player: {
+          id: player.id,
+          userName: player.userName,
+        },
+        isDrawer: true,
+        drawer: this._drawer && {
+          id: this._drawer.id,
+          userName: this._drawer.userName,
+        },
+        viewers: this._viewers.map(viewer => ({
+          id: viewer.id,
+          userName: viewer.userName,
+        })),
+      });
+
+      return;
+    }
+
+    if (this._viewers.some(viewer => viewer.id === player.id)) {
+      this._viewers = this._viewers.filter(viewer => viewer.id !== player.id);
+
+      this._emitWhiteboardEvent({
+        type: 'WhiteboardPlayerLeave',
+        player: {
+          id: player.id,
+          userName: player.userName,
+        },
+        isDrawer: false,
+        drawer: this._drawer && {
+          id: this._drawer.id,
+          userName: this._drawer.userName,
+        },
+        viewers: this._viewers.map(viewer => ({
+          id: viewer.id,
+          userName: viewer.userName,
+        })),
+      });
+      return;
+    }
+
+    throw new InvalidParametersError(`Player with username: ${player.userName} doesn't exist`);
+  }
+
+  private _emitWhiteboardEvent(content: Omit<WhiteboardServerResponse, 'id'>) {
+    try {
+      this._townEmitter.emit('whiteboardReponse', {
+        id: this.id,
+        ...content,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   }
 }

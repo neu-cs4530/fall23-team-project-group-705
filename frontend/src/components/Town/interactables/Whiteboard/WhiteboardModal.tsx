@@ -1,11 +1,4 @@
-import {
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-} from '@chakra-ui/react';
+import { Modal, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay } from '@chakra-ui/react';
 import React, { useCallback, useEffect } from 'react';
 import { useInteractable } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
@@ -14,38 +7,35 @@ import WhiteboardArea from './WhiteboardArea';
 
 export default function WhiteboardModal(): JSX.Element {
   const townController = useTownController();
-  const newWhiteboard = useInteractable<WhiteboardArea>('whiteboardArea');
+  const whiteboardArea = useInteractable<WhiteboardArea>('whiteboardArea');
 
-  // useEffect(() => {
-  //   if (newWhiteboard) {
-  //     coveyTownController.pause();
-  //   } else {
-  //     coveyTownController.unPause();
-  //   }
-  // }, [coveyTownController, newWhiteboard]);
-
-  // const closeModal = useCallback(() => {
-  //   if (newWhiteboard) {
-  //     coveyTownController.interactEnd(newWhiteboard);
-  //   }
-  // }, [coveyTownController, newWhiteboard]);
+  useEffect(() => {
+    if (whiteboardArea) {
+      const whiteboardController = townController.getWhiteboardAreaController(whiteboardArea.id);
+      whiteboardController.joinArea();
+    }
+  }, [townController, whiteboardArea]);
 
   const onClose = useCallback(() => {
-    if (newWhiteboard) {
-      townController.interactEnd(newWhiteboard);
-      console.log(newWhiteboard);
-      const whiteboardController = townController.getWhiteboardAreaController(newWhiteboard);
+    if (whiteboardArea) {
+      townController.interactEnd(whiteboardArea);
+      const whiteboardController = townController.getWhiteboardAreaController(whiteboardArea.id);
       whiteboardController.leaveArea();
     }
-  }, [townController, newWhiteboard]);
-  return (
-    <Modal isOpen={newWhiteboard !== undefined} onClose={onClose}>
-      <ModalOverlay />
-      <ModalContent maxW={'fit-content'} maxH={'fit-content'} margin={'2'}>
-        <ModalHeader paddingBottom={0}>Whiteboard</ModalHeader>
-        <ModalCloseButton />
-        <Whiteboard />
-      </ModalContent>
-    </Modal>
-  );
+  }, [townController, whiteboardArea]);
+
+  if (whiteboardArea) {
+    return (
+      <Modal isOpen={whiteboardArea !== undefined} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent maxW={'fit-content'} maxH={'fit-content'} margin={'2'}>
+          <ModalHeader paddingBottom={0}>Whiteboard</ModalHeader>
+          <ModalCloseButton />
+          <Whiteboard interactableId={whiteboardArea.id} />
+        </ModalContent>
+      </Modal>
+    );
+  }
+
+  return <></>;
 }

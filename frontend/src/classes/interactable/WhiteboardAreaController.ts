@@ -1,4 +1,8 @@
-import { WhiteboardArea as WhiteboardAreaModel } from '../../types/CoveyTownSocket';
+import {
+  WhiteboardArea as WhiteboardAreaModel,
+  WhiteboardPlayer,
+  WhiteboardServerResponse,
+} from '../../types/CoveyTownSocket';
 import TownController from '../TownController';
 import InteractableAreaController, { BaseInteractableEventMap } from './InteractableAreaController';
 
@@ -19,9 +23,6 @@ export default class WhiteboardAreaController extends InteractableAreaController
   WhiteboardAreaEvent,
   WhiteboardAreaModel
 > {
-  // TODO: Define boardstate type
-  private _board: any = undefined;
-
   private _model: WhiteboardAreaModel;
 
   private _townController: TownController;
@@ -45,6 +46,54 @@ export default class WhiteboardAreaController extends InteractableAreaController
     // TODO: Update the board
   }
 
+  public handleServerResponse(response: WhiteboardServerResponse) {
+    if (response.type === 'WhiteboardPlayerJoin') {
+      this._handlePlayerJoin(response.player, response.isDrawer, response.drawer, response.viewers);
+    }
+    if (response.type === 'WhiteboardPlayerLeave') {
+      this._handlePlayerLeave(
+        response.player,
+        response.isDrawer,
+        response.drawer,
+        response.viewers,
+      );
+    }
+  }
+
+  private _handlePlayerJoin(
+    player: WhiteboardPlayer,
+    isDrawer: boolean,
+    drawer: WhiteboardPlayer,
+    viewers: WhiteboardPlayer[],
+  ) {
+    this._model.drawer = drawer;
+    this._model.viewers = viewers;
+    this.emit('whiteboardPlayerJoin', {
+      player,
+      isDrawer,
+    });
+  }
+
+  private _handlePlayerLeave(
+    player: WhiteboardPlayer,
+    isDrawer: boolean,
+    drawer: WhiteboardPlayer,
+    viewers: WhiteboardPlayer[],
+  ) {
+    this._model.drawer = drawer;
+    this._model.viewers = viewers;
+
+    if (isDrawer) {
+      this.emit('whiteboardNewDrawer', {
+        player: drawer,
+      });
+    }
+
+    this.emit('whiteboardPlayerLeave', {
+      player: player,
+    });
+  }
+
   /**
    * A whiteboard area is empty if there are no occupants in it, or the topic is undefined.
    */
@@ -61,6 +110,8 @@ export default class WhiteboardAreaController extends InteractableAreaController
       id: this.id,
       occupants: this.occupants.map(player => player.id),
       type: 'WhiteboardArea',
+      drawer: this._model.drawer,
+      viewers: this._model.viewers,
     };
   }
 

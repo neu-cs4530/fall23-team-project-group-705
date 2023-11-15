@@ -449,6 +449,16 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         console.trace(err);
       }
     });
+
+    this._socket.on('whiteboardReponse', response => {
+      try {
+        const controller = this.getWhiteboardAreaController(response.id);
+        controller.handleServerResponse(response);
+      } catch (err) {
+        console.error('Error with whiteboard', response);
+        console.trace(err);
+      }
+    });
   }
 
   /**
@@ -647,14 +657,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     });
   }
 
-  public getWhiteboardAreaController(whiteboardArea: WhiteboardArea): WhiteboardAreaController {
+  public getWhiteboardAreaController(whiteboardAreaId: string): WhiteboardAreaController {
     const existingController = this._interactableControllers.find(
-      eachExistingArea => eachExistingArea.id === whiteboardArea.id,
+      eachExistingArea => eachExistingArea.id === whiteboardAreaId,
     );
     if (existingController instanceof WhiteboardAreaController) {
       return existingController;
     } else {
-      throw new Error(`No such whiteboard area controller ${existingController}`);
+      throw new Error(`No such whiteboard area controller with id ${whiteboardAreaId}`);
     }
   }
 
@@ -678,7 +688,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   public getConversationAreaController(
     converationArea: ConversationArea,
   ): ConversationAreaController {
-    console.log(this._interactableControllers);
     const existingController = this._interactableControllers.find(
       eachExistingArea => eachExistingArea.id === converationArea.name,
     );
