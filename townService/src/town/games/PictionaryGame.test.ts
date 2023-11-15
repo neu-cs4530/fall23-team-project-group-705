@@ -2,10 +2,11 @@ import PictionaryGame from './PictionaryGame';
 import PictionaryWordlist from './PictionaryWordlist';
 import { createPlayerForTesting } from '../../TestUtils';
 import Player from '../../lib/Player';
+import { GameMove, PictionaryMove, PlayerID } from '../../types/CoveyTownSocket';
 
 describe('PictionaryGame', () => {
   let game: PictionaryGame;
-  const wordlist: string[] = PictionaryWordlist();
+  const wordlist: string[] = PictionaryWordlist;
 
   beforeEach(() => {
     game = new PictionaryGame();
@@ -28,6 +29,27 @@ describe('PictionaryGame', () => {
   describe('applyMove', () => {
     let player1: Player;
     let player2: Player;
+    const makeCorrectGuess: (playerID: PlayerID) => GameMove<PictionaryMove> = (playerID: PlayerID) => {
+      return {
+        playerID: playerID,
+        gameID: game.id,
+        move: {
+          guesser: playerID,
+          guessWord: game.state.currentWord,
+        }
+      }
+    }
+
+    const makeInorrectGuess: (playerID: PlayerID) => GameMove<PictionaryMove> = (playerID: PlayerID) => {
+      return {
+        playerID: playerID,
+        gameID: game.id,
+        move: {
+          guesser: playerID,
+          guessWord: 'Incorrect guess',
+        }
+      }
+    }
 
     beforeEach(() => {
       player1 = createPlayerForTesting();
@@ -43,15 +65,7 @@ describe('PictionaryGame', () => {
         const priorState = {
           ...game.state,
         }
-        const move = {
-          playerID: player2.id,
-          gameID: game.id,
-          move: {
-            guesser: player2.id,
-            guessWord: 'Not the correct word',
-          }
-        }
-        game.applyMove(move);
+        game.applyMove(makeInorrectGuess(player2.id));
         expect(priorState).toEqual(game.state);
       });
       it('should update scores and alreadyGuessedCorrectly, and nothing else', () => {
@@ -60,17 +74,17 @@ describe('PictionaryGame', () => {
           alreadyGuessedCorrectly: [player2.id],
           scores: {[player2.id]: 1}
         }
-        const move = {
-          playerID: player2.id,
-          gameID: game.id,
-          move: {
-            guesser: player2.id,
-            guessWord: game.state.currentWord,
-          }
-        }
-        game.applyMove(move);
+        game.applyMove(makeCorrectGuess(player2.id));
         expect(game.state).toEqual(desiredNewState);
       });
+      // it('should update scores accurately for multiple players with multiple guesses', () => {
+      //   const player3 = createPlayerForTesting();
+      //   game.join(player3);
+
+      //   game.applyMove(makeCorrectGuess(player2.id));
+      //   game.applyMove(makeCorrectGuess(player3.id));
+      //   expect(game.state).toEqual(desiredNewState);
+      // });
     })
   });
 });

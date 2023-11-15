@@ -22,7 +22,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       currentWord: '',
       status: 'WAITING_TO_START',
     });
-    this._wordlist = PictionaryWordlist();
+    this._wordlist = PictionaryWordlist;
     this.newWord();
   }
 
@@ -64,6 +64,8 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
         alreadyGuessedCorrectly: newAlreadyGuessedCorrectly,
         scores: newScores,
       }
+
+      // Check for turn end
     } else {
       // Guess was incorrect
     }

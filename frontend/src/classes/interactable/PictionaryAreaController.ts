@@ -3,7 +3,6 @@ import PlayerController from '../PlayerController';
 import GameAreaController, { GameEventTypes } from './GameAreaController';
 
 export const PLAYER_NOT_IN_GAME_ERROR = 'Player is not in game';
-
 export const NO_GAME_IN_PROGRESS_ERROR = 'No game in progress';
 
 export type PictionaryEvents = GameEventTypes & {
@@ -123,6 +122,17 @@ export default class PictionaryAreaController extends GameAreaController<
         guesser: this._townController.ourPlayer.id,
         guessWord,
       },
+    });
+  }
+
+  public async startGame() {
+    const instanceID = this._instanceID;
+    if (!instanceID) {
+      throw new Error(NO_GAME_IN_PROGRESS_ERROR);
+    }
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'StartGame',
+      gameID: instanceID,
     });
   }
 }

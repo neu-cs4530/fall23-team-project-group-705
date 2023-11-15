@@ -187,6 +187,23 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
               Guess
           </Button>
         </ListItem>
+        <ListItem>
+          Test start game:
+          <Button 
+            onClick={async () => {
+              try {
+                await gameAreaController.startGame();
+              } catch (e) {
+                toast ({
+                  title: 'Error starting game',
+                  description: (e as Error).toString(),
+                  status: 'error', 
+                });
+              }
+            }}>
+            Start
+          </Button>
+        </ListItem>
       </ UnorderedList>
       
       <Accordion allowToggle>
