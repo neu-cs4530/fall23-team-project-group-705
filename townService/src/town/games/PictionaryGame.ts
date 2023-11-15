@@ -180,4 +180,19 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       }
     }
   }
+
+  private _findDrawer(): Player {
+    return this._players.find(player => player.id === this.state.drawer)!;
+  }
+
+  public nextTurn(): void {
+    const indexOfplayer: number = this._players.indexOf(this._findDrawer());
+    if (indexOfplayer === this._players.length - 1) {
+      this.state.status = 'OVER';
+    }
+    if (indexOfplayer !== -1 && indexOfplayer < this._players.length - 1) {
+      this.state.drawer = this._players[indexOfplayer + 1].id;
+      this._players.splice(indexOfplayer, 1);
+    }
+  }
 }
