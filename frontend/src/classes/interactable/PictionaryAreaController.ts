@@ -17,7 +17,6 @@ export default class PictionaryAreaController extends GameAreaController<
   PictionaryGameState,
   PictionaryEvents
 > {
-
   /**
    * Returns the current word being guessed.
    */

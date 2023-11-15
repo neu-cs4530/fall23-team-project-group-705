@@ -78,8 +78,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   const [guess, setGuess] = useState('');
   const toast = useToast();
 
-  
-
   useEffect(() => {
     const updateGameState = () => {
       setHistory(gameAreaController.history);
@@ -182,7 +180,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
 
   const guessButtonHandler = () => {
     console.log(`guess button clicked with guess ${guess}`);
-  }
+  };
 
   return (
     <Container>
@@ -191,12 +189,12 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
         <ListItem>Current Word: {currentWord}</ListItem>
         <ListItem>
           Guess box:
-          <Input 
-            placeholder='Type your guess here' 
-            value={guess} 
-            onChange={event => setGuess(event.target.value)} 
+          <Input
+            placeholder='Type your guess here'
+            value={guess}
+            onChange={event => setGuess(event.target.value)}
           />
-          <Button 
+          <Button
             onClick={async () => {
               try {
                 await gameAreaController.makeGuess(guess);
@@ -208,29 +206,28 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
                 });
               }
             }}>
-              Guess
+            Guess
           </Button>
         </ListItem>
         <ListItem>
           Test start game:
-          <Button 
+          <Button
             onClick={async () => {
               try {
                 await gameAreaController.startGame();
               } catch (e) {
-                toast ({
+                toast({
                   title: 'Error starting game',
                   description: (e as Error).toString(),
-                  status: 'error', 
+                  status: 'error',
                 });
               }
             }}>
             Start
           </Button>
         </ListItem>
-      </ UnorderedList>
-      
- s      <Accordion allowToggle>
+      </UnorderedList>
+      <Accordion allowToggle>
         <AccordionItem>
           <Heading as='h3'>
             <AccordionButton>

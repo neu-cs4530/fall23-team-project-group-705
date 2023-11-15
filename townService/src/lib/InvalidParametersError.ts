@@ -14,7 +14,9 @@ export const MOVE_NOT_YOUR_TURN_MESSAGE = 'Not your turn';
 
 export const PLAYER_NOT_IN_GAME_MESSAGE = 'Player is not in this game';
 export const PLAYER_ALREADY_IN_GAME_MESSAGE = 'Player is already in this game';
-export const PLAYER_ALREADY_GUESSED_MESSAGE = 'Player has already guessed correctly'
+export const PLAYER_ALREADY_GUESSED_MESSAGE = 'Player has already guessed correctly';
+export const DRAWER_UNDEFINED_MESSAGE = 'There is nobody drawing right now';
+export const DRAWER_NOT_IN_GAME_MESSAGE = 'The drawer is not in this game';
 export default class InvalidParametersError extends Error {
   public message: string;
 
