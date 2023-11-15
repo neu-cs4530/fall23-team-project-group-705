@@ -3,7 +3,6 @@ import PlayerController from '../PlayerController';
 import GameAreaController, { GameEventTypes } from './GameAreaController';
 
 export const PLAYER_NOT_IN_GAME_ERROR = 'Player is not in game';
-
 export const NO_GAME_IN_PROGRESS_ERROR = 'No game in progress';
 
 export type PictionaryEvents = GameEventTypes & {
@@ -18,13 +17,21 @@ export default class PictionaryAreaController extends GameAreaController<
   PictionaryGameState,
   PictionaryEvents
 > {
-  protected _currentWord = '';
-
   /**
    * Returns the current word being guessed.
    */
   get currentWord(): string {
-    return this._currentWord;
+    // If the game is not started and this field is accessed, should I throw an error like this:
+    // if (!this._model.game) {
+    //   throw Error(NO_GAME_IN_PROGRESS_ERROR);
+    // }
+
+    // Or should I just return a default value like this?
+    if (!this._model.game) {
+      return '';
+    }
+
+    return this._model.game.state.currentWord;
   }
 
   /**
@@ -96,7 +103,7 @@ export default class PictionaryAreaController extends GameAreaController<
    * If the turn has not changed, does not emit the event.
    */
   protected _updateFrom(newModel: GameArea<PictionaryGameState>): void {
-    console.log('_updateFrom called.');
+    super._updateFrom(newModel);
   }
 
   /**
@@ -118,6 +125,17 @@ export default class PictionaryAreaController extends GameAreaController<
         guesser: this._townController.ourPlayer.id,
         guessWord,
       },
+    });
+  }
+
+  public async startGame() {
+    const instanceID = this._instanceID;
+    if (!instanceID) {
+      throw new Error(NO_GAME_IN_PROGRESS_ERROR);
+    }
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'StartGame',
+      gameID: instanceID,
     });
   }
 }

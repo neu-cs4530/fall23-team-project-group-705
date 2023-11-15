@@ -137,13 +137,20 @@ export interface PictionaryMove {
 
 /**
  * Type for the state of a Pictionary game
- * The state of the game is represented as a word, and the playerIDs of the players 
- * (the drawer and the guessers), and a map of scores.
+ * The state of the game is represented as: 
+ * currentWord: The word the drawer is drawing
+ * pastWords: The words that have already come up this game
+ * drawer: the ID of the player who is currently drawing
+ * alreadyGuessedCorrectly: a lsit of the IDs of all the players who have already guessed correctly and scored for this turn
+ * scores: a record of the score for each player who has scored.
  */
 export interface PictionaryGameState extends WinnableGameState {
   currentWord: string;
+  timer: number;
+  betweenTurns?: boolean;
   pastWords?: string[];
   drawer?: PlayerID;
+  alreadyGuessedCorrectly?: PlayerID[];
   scores?: Record<PlayerID,number>;
 }
 
@@ -202,7 +209,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<PictionaryMove> | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<PictionaryMove> | LeaveGameCommand | StartGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
@@ -218,6 +225,10 @@ export interface GameMoveCommand<MoveType> {
   type: 'GameMove';
   gameID: GameInstanceID;
   move: MoveType;
+}
+export interface StartGameCommand {
+  type: 'StartGame';
+  gameID: GameInstanceID;
 }
 export type InteractableCommandReturnType<CommandType extends InteractableCommand> = 
   CommandType extends JoinGameCommand ? { gameID: string}:
