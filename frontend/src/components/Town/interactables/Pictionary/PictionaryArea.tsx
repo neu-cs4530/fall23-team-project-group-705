@@ -164,8 +164,8 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     );
   }
 
-  //to use it:  <EndGameScore scores={gameAreaController.score()} />;
-  const EndGameScore: React.FC<PictionaryGameState> = ({ scores }) => {
+  //to use it:  {EndGameScore(gameAreaController.scores)};
+  const EndGameScore = (scores: Record<PlayerID, number> | undefined) => {
     return (
       <div>
         <h1>End Game Scores</h1>
@@ -201,7 +201,9 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
           <Button
             onClick={async () => {
               try {
-                await gameAreaController.makeGuess(guess);
+                await gameAreaController.makeGuess(guess).then(() => {
+                  setGuess('');
+                });
               } catch (e) {
                 toast({
                   title: 'Error making guess',
@@ -230,9 +232,10 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
             Start
           </Button>
           <ListItem>
-            BetweenTurns?: {betweenTurns ? 'true' : 'false'}, Timer: {timer} 
+            BetweenTurns?: {betweenTurns ? 'true' : 'false'}, Timer: {timer}
           </ListItem>
         </ListItem>
+        <ListItem>{EndGameScore(gameAreaController.scores)}</ListItem>
       </UnorderedList>
       <Accordion allowToggle>
         <AccordionItem>

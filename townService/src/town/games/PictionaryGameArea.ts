@@ -27,7 +27,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
   public constructor(id: string, { x, y, width, height }: BoundingBox, townEmitter: TownEmitter) {
     super(id, { x, y, width, height }, townEmitter);
     setTimeout(() => {
-      this.tick();
+      this._tick();
     }, 1000);
   }
 
@@ -147,7 +147,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
   }
 
   // Ticks the game forwards by one second, updating both back and frontend.
-  private tick(): void {
+  private _tick(): void {
     if (this._game !== undefined) {
       this._game.tick();
       this._stateUpdated(this._game.toModel());
@@ -159,7 +159,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
      * which would let us avoid recursion, means that this._game is read as undefined even after is has been updated.
      */
     setTimeout(() => {
-      this.tick();
+      this._tick();
     }, 1000);
   }
 }

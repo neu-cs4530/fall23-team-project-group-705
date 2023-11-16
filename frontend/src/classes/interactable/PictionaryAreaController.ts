@@ -99,7 +99,7 @@ export default class PictionaryAreaController extends GameAreaController<
     return this._model.game?.state.status === 'IN_PROGRESS';
   }
 
-  get score(): Record<PlayerID, number> | undefined {
+  get scores(): Record<PlayerID, number> | undefined {
     return this._model.game?.state.scores;
   }
 
