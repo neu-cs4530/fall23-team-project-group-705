@@ -61,8 +61,14 @@ export default class WhiteboardArea extends InteractableArea {
       id: this.id,
       occupants: this.occupantsByID,
       type: 'WhiteboardArea',
-      drawer: this._drawer,
-      viewers: this._viewers,
+      drawer: this._drawer && {
+        id: this._drawer.id,
+        userName: this._drawer.userName,
+      },
+      viewers: this._viewers.map(viewer => ({
+        id: viewer.id,
+        userName: viewer.userName,
+      })),
     };
   }
 
