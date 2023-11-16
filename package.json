@@ -38,11 +38,8 @@
         "npm": "9.x.x"
     },
     "dependencies": {
-        "@excalidraw/excalidraw": "^0.16.1",
         "@types/ramda": "^0.27.34",
         "ramda": "^0.27.1",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
         "typescript-is": "^0.17.0"
     },
     "files": [
