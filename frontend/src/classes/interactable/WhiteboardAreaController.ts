@@ -1,3 +1,4 @@
+import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
 import {
   WhiteboardArea as WhiteboardAreaModel,
   WhiteboardPlayer,
@@ -42,14 +43,27 @@ export default class WhiteboardAreaController extends InteractableAreaController
     return this.occupants.length > 0;
   }
 
+  public isDrawer(): boolean {
+    return this._model.drawer === undefined
+      ? true
+      : this._model.drawer.id === this._townController.ourPlayer.id;
+  }
+
   protected _updateFrom(newModel: WhiteboardAreaModel): void {
     // TODO: Update the board
   }
 
   public handleServerResponse(response: WhiteboardServerResponse) {
     if (response.type === 'WhiteboardPlayerJoin') {
-      this._handlePlayerJoin(response.player, response.isDrawer, response.drawer, response.viewers);
+      this._handlePlayerJoin(
+        response.player,
+        response.isDrawer,
+        response.drawer,
+        response.viewers,
+        response.elements,
+      );
     }
+
     if (response.type === 'WhiteboardPlayerLeave') {
       this._handlePlayerLeave(
         response.player,
@@ -58,16 +72,36 @@ export default class WhiteboardAreaController extends InteractableAreaController
         response.viewers,
       );
     }
+
+    if (response.type === 'WhiteboardDrawerChange') {
+      this._handleDrawerChange(response.elements);
+    }
+  }
+
+  private _handleDrawerChange(elements: unknown) {
+    if (!this.isDrawer()) {
+      this.emit('whiteboardNewScene', {
+        elements,
+      });
+    }
   }
 
   private _handlePlayerJoin(
     player: WhiteboardPlayer,
     isDrawer: boolean,
-    drawer: WhiteboardPlayer,
+    drawer: WhiteboardPlayer | undefined,
     viewers: WhiteboardPlayer[],
+    elements: unknown,
   ) {
     this._model.drawer = drawer;
     this._model.viewers = viewers;
+
+    if (this._townController.ourPlayer.id === player.id) {
+      this.emit('whiteboardNewScene', {
+        elements,
+      });
+    }
+
     this.emit('whiteboardPlayerJoin', {
       player,
       isDrawer,
@@ -77,7 +111,7 @@ export default class WhiteboardAreaController extends InteractableAreaController
   private _handlePlayerLeave(
     player: WhiteboardPlayer,
     isDrawer: boolean,
-    drawer: WhiteboardPlayer,
+    drawer: WhiteboardPlayer | undefined,
     viewers: WhiteboardPlayer[],
   ) {
     this._model.drawer = drawer;
@@ -124,6 +158,13 @@ export default class WhiteboardAreaController extends InteractableAreaController
   public async joinArea() {
     await this._townController.sendInteractableCommand(this.id, {
       type: 'WhiteboardJoin',
+    });
+  }
+
+  public async boardChange(elements: Readonly<ExcalidrawElement[]>) {
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'WhiteboardChange',
+      elements,
     });
   }
 }
