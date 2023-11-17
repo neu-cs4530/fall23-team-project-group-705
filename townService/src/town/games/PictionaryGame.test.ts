@@ -61,7 +61,7 @@ describe('PictionaryGame', () => {
       beforeEach(() => {
         game.join(player1);
         game.join(player2);
-        game.join(player3)
+        game.join(player3);
         game.startGame();
       });
       it('should do nothing on an incorrect guess', () => {
@@ -79,13 +79,12 @@ describe('PictionaryGame', () => {
         expect(game.state.scores).toEqual({ [player2.id]: 1 });
       });
       it('should update scores accurately for multiple players with multiple guesses', () => {
-
         game.applyMove(makeCorrectGuess(player2.id));
         game.applyMove(makeIncorrectGuess(player3.id));
 
         let desiredScores = {
           [player2.id]: 1,
-        }
+        };
         expect(game.state.scores).toEqual(desiredScores);
 
         game.applyMove(makeCorrectGuess(player3.id));
@@ -93,18 +92,17 @@ describe('PictionaryGame', () => {
         desiredScores = {
           [player2.id]: 1,
           [player3.id]: 1,
-        }
+        };
         expect(game.state.scores).toEqual(desiredScores);
       });
       it('should update scores accurately over multiple turns', () => {
-
         game.applyMove(makeCorrectGuess(player2.id));
         game.applyMove(makeCorrectGuess(player3.id));
 
         let desiredScores = {
           [player2.id]: 1,
           [player3.id]: 1,
-        }
+        };
         expect(game.state.scores).toEqual(desiredScores);
 
         // Earlier both guessers guessed correctly, so the turn ended. This skips through the intermission.
@@ -114,12 +112,12 @@ describe('PictionaryGame', () => {
 
         game.applyMove(makeCorrectGuess(player1.id));
         game.applyMove(makeCorrectGuess(player3.id));
-        
+
         desiredScores = {
           [player1.id]: 1,
           [player2.id]: 1,
           [player3.id]: 2,
-        }
+        };
         expect(game.state.scores).toEqual(desiredScores);
       });
     });
