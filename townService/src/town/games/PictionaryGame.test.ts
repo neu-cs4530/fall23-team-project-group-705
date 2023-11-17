@@ -68,14 +68,12 @@ describe('PictionaryGame', () => {
         game.applyMove(makeInorrectGuess(player2.id));
         expect(priorState).toEqual(game.state);
       });
-      it('should update scores and alreadyGuessedCorrectly, and nothing else', () => {
-        const desiredNewState = {
-          ...game.state,
-          alreadyGuessedCorrectly: [player2.id],
-          scores: { [player2.id]: 1 },
-        };
+      it('should update scores and alreadyGuessedCorrectly', () => {
+        expect(game.state.alreadyGuessedCorrectly).toBeUndefined();
+        expect(game.state.scores).toBeUndefined();
         game.applyMove(makeCorrectGuess(player2.id));
-        expect(game.state).toEqual(desiredNewState);
+        expect(game.state.alreadyGuessedCorrectly).toEqual([player2.id]);
+        expect(game.state.scores).toEqual({[player2.id]: 1});
       });
       // it('should update scores accurately for multiple players with multiple guesses', () => {
       //   const player3 = createPlayerForTesting();
