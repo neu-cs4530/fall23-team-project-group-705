@@ -26,10 +26,10 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   private _wordlist: string[];
 
   // The length, in seconds. of one drawer's turn.
-  private static readonly _turnLength = 30;
+  public static readonly turnLength = 30;
 
   // The length, in seconds, between turns.
-  private static readonly _intermissionLength = 5;
+  public static readonly intermissionLength = 5;
 
   public constructor() {
     super({
@@ -162,14 +162,14 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
 
       if (this.state.betweenTurns) {
         // In an intermission
-        if (timer > PictionaryGame._intermissionLength) {
+        if (timer > PictionaryGame.intermissionLength) {
           this.nextTurn();
           betweenTurns = false;
           timer = 0;
         } else {
           betweenTurns = true;
         }
-      } else if (timer > PictionaryGame._turnLength) {
+      } else if (timer > PictionaryGame.turnLength) {
         // In a turn
         betweenTurns = true;
         timer = 0;

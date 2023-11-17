@@ -29,6 +29,7 @@ describe('PictionaryGame', () => {
   describe('applyMove', () => {
     let player1: Player;
     let player2: Player;
+    let player3: Player;
     const makeCorrectGuess: (playerID: PlayerID) => GameMove<PictionaryMove> = (
       playerID: PlayerID,
     ) => ({
@@ -40,7 +41,7 @@ describe('PictionaryGame', () => {
       },
     });
 
-    const makeInorrectGuess: (playerID: PlayerID) => GameMove<PictionaryMove> = (
+    const makeIncorrectGuess: (playerID: PlayerID) => GameMove<PictionaryMove> = (
       playerID: PlayerID,
     ) => ({
       playerID,
@@ -54,18 +55,20 @@ describe('PictionaryGame', () => {
     beforeEach(() => {
       player1 = createPlayerForTesting();
       player2 = createPlayerForTesting();
+      player3 = createPlayerForTesting();
     });
     describe('once the game has started', () => {
       beforeEach(() => {
         game.join(player1);
         game.join(player2);
+        game.join(player3)
         game.startGame();
       });
       it('should do nothing on an incorrect guess', () => {
         const priorState = {
           ...game.state,
         };
-        game.applyMove(makeInorrectGuess(player2.id));
+        game.applyMove(makeIncorrectGuess(player2.id));
         expect(priorState).toEqual(game.state);
       });
       it('should update scores and alreadyGuessedCorrectly', () => {
@@ -75,14 +78,50 @@ describe('PictionaryGame', () => {
         expect(game.state.alreadyGuessedCorrectly).toEqual([player2.id]);
         expect(game.state.scores).toEqual({ [player2.id]: 1 });
       });
-      // it('should update scores accurately for multiple players with multiple guesses', () => {
-      //   const player3 = createPlayerForTesting();
-      //   game.join(player3);
+      it('should update scores accurately for multiple players with multiple guesses', () => {
 
-      //   game.applyMove(makeCorrectGuess(player2.id));
-      //   game.applyMove(makeCorrectGuess(player3.id));
-      //   expect(game.state).toEqual(desiredNewState);
-      // });
+        game.applyMove(makeCorrectGuess(player2.id));
+        game.applyMove(makeIncorrectGuess(player3.id));
+
+        let desiredScores = {
+          [player2.id]: 1,
+        }
+        expect(game.state.scores).toEqual(desiredScores);
+
+        game.applyMove(makeCorrectGuess(player3.id));
+
+        desiredScores = {
+          [player2.id]: 1,
+          [player3.id]: 1,
+        }
+        expect(game.state.scores).toEqual(desiredScores);
+      });
+      it('should update scores accurately over multiple turns', () => {
+
+        game.applyMove(makeCorrectGuess(player2.id));
+        game.applyMove(makeCorrectGuess(player3.id));
+
+        let desiredScores = {
+          [player2.id]: 1,
+          [player3.id]: 1,
+        }
+        expect(game.state.scores).toEqual(desiredScores);
+
+        // Earlier both guessers guessed correctly, so the turn ended. This skips through the intermission.
+        for (let i = 0; i < PictionaryGame.intermissionLength + 1; i++) {
+          game.tick();
+        }
+
+        game.applyMove(makeCorrectGuess(player1.id));
+        game.applyMove(makeCorrectGuess(player3.id));
+        
+        desiredScores = {
+          [player1.id]: 1,
+          [player2.id]: 1,
+          [player3.id]: 2,
+        }
+        expect(game.state.scores).toEqual(desiredScores);
+      });
     });
   });
 });
