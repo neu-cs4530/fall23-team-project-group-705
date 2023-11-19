@@ -21,7 +21,7 @@ export default class WhiteboardArea extends InteractableArea {
 
   /** The whiteboard area is "active" when there are players inside of it  */
   public get isActive(): boolean {
-    return this._occupants.length > 0;
+    return this._drawer !== undefined || this._viewers.length > 0;
   }
 
   /**
@@ -112,6 +112,11 @@ export default class WhiteboardArea extends InteractableArea {
     if (command.type === 'WhiteboardChange') {
       this._handleWhiteboardChange(player, command.elements);
     }
+
+    if (command.type === 'WhiteboardPointerChange') {
+      this._handleWhiteboardPointerChange(player, command.payload);
+    }
+
     return undefined as InteractableCommandReturnType<CommandType>;
   }
 
@@ -153,6 +158,8 @@ export default class WhiteboardArea extends InteractableArea {
         this._drawer = this._viewers.shift();
       }
 
+      this._resetWhiteboardState();
+
       this._emitWhiteboardEvent({
         id: this.id,
         type: 'WhiteboardPlayerLeave',
@@ -176,6 +183,7 @@ export default class WhiteboardArea extends InteractableArea {
 
     if (this._viewers.some(viewer => viewer.id === player.id)) {
       this._viewers = this._viewers.filter(viewer => viewer.id !== player.id);
+      this._resetWhiteboardState();
 
       this._emitWhiteboardEvent({
         id: this.id,
@@ -210,6 +218,24 @@ export default class WhiteboardArea extends InteractableArea {
     });
 
     this._elements = elements;
+  }
+
+  private _handleWhiteboardPointerChange(player: Player, payload: unknown) {
+    player.townEmitter.emit('whiteboardReponse', {
+      id: this.id,
+      type: 'WhiteboardPointerUpdate',
+      player: {
+        id: player.id,
+        userName: player.userName,
+      },
+      payload,
+    });
+  }
+
+  private _resetWhiteboardState() {
+    if (!this.isActive) {
+      this._elements = [];
+    }
   }
 
   private _emitWhiteboardEvent(content: WhiteboardServerResponse) {

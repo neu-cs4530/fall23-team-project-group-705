@@ -1,4 +1,5 @@
 import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
+import { Payload } from '../../components/Town/interactables/Whiteboard/Whiteboard';
 import {
   WhiteboardArea as WhiteboardAreaModel,
   WhiteboardPlayer,
@@ -39,6 +40,14 @@ export default class WhiteboardAreaController extends InteractableAreaController
     this._townController = townController;
   }
 
+  public get drawer() {
+    return this._model.drawer;
+  }
+
+  public get viewers() {
+    return this._model.viewers;
+  }
+
   public isActive(): boolean {
     return this.occupants.length > 0;
   }
@@ -75,6 +84,19 @@ export default class WhiteboardAreaController extends InteractableAreaController
 
     if (response.type === 'WhiteboardDrawerChange') {
       this._handleDrawerChange(response.elements);
+    }
+
+    if (response.type === 'WhiteboardPointerUpdate') {
+      this._handlePointerUpdate(response.player, response.payload);
+    }
+  }
+
+  private _handlePointerUpdate(player: WhiteboardPlayer, payload: unknown) {
+    if (this._townController.ourPlayer.id !== player.id) {
+      this.emit('whiteboardPointerUpdate', {
+        player,
+        payload,
+      });
     }
   }
 
@@ -166,5 +188,14 @@ export default class WhiteboardAreaController extends InteractableAreaController
       type: 'WhiteboardChange',
       elements,
     });
+  }
+
+  public async pointerChange(payload: Payload) {
+    if (payload.pointersMap.size < 2) {
+      await this._townController.sendInteractableCommand(this.id, {
+        type: 'WhiteboardPointerChange',
+        payload,
+      });
+    }
   }
 }

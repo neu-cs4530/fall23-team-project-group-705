@@ -1,21 +1,29 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { AlertStatus, Box, useToast } from '@chakra-ui/react';
+import { AlertStatus, VStack, useToast } from '@chakra-ui/react';
 
 import { Excalidraw } from '@excalidraw/excalidraw';
 import useTownController from '../../../../hooks/useTownController';
 import { WhiteboardPlayer } from '../../../../types/CoveyTownSocket';
-import { ExcalidrawImperativeAPI } from '@excalidraw/excalidraw/types/types';
+import { Collaborator, ExcalidrawImperativeAPI, Gesture } from '@excalidraw/excalidraw/types/types';
 import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
+import throttle from 'lodash.throttle';
+
+const THROTTLE_TIMEOUT = 20;
 
 export default function Whiteboard({ interactableId }: { interactableId: string }) {
   const townController = useTownController();
   const whiteboardController = townController.getWhiteboardAreaController(interactableId);
+
   const [excalidrawState, setExcalidrawState] = useState<ExcalidrawImperativeAPI | null>();
-  const [isDrawerState, setIsDrawerState] = useState<boolean>(false);
   const refCallback = useCallback(
     (value: ExcalidrawImperativeAPI | null) => setExcalidrawState(value),
     [],
   );
+
+  const [isDrawerState, setIsDrawerState] = useState<boolean>(false);
+  const [drawer, setDrawer] = useState(whiteboardController.drawer);
+  const [viewers, setViewers] = useState(whiteboardController.viewers);
+
   const toast = useToast();
 
   const whiteboardToast = useCallback(
@@ -40,6 +48,36 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
     [toast],
   );
 
+  const setCollaborators = useCallback(
+    ({
+      newDrawer,
+      newViewers,
+    }: {
+      newDrawer: WhiteboardPlayer | undefined;
+      newViewers: WhiteboardPlayer[];
+    }) => {
+      const newCollaborators = new Map<string, Collaborator>();
+      if (newDrawer) {
+        newCollaborators.set(newDrawer.id, {
+          id: newDrawer.id,
+          username: newDrawer.userName,
+        });
+      }
+
+      newViewers.forEach(newViewer => {
+        newCollaborators.set(newViewer.id, {
+          id: newViewer.id,
+          username: newViewer.userName,
+        });
+      });
+
+      excalidrawState?.updateScene({
+        collaborators: newCollaborators,
+      });
+    },
+    [excalidrawState],
+  );
+
   useEffect(() => {
     const handleJoin = ({ player, isDrawer }: { player: WhiteboardPlayer; isDrawer: boolean }) => {
       const role = isDrawer ? 'Drawer' : 'Viewer';
@@ -53,6 +91,12 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
         status: 'info',
       });
       setIsDrawerState(whiteboardController.isDrawer());
+      setDrawer(whiteboardController.drawer);
+      setViewers(whiteboardController.viewers);
+      setCollaborators({
+        newDrawer: whiteboardController.drawer,
+        newViewers: whiteboardController.viewers,
+      });
     };
 
     const handleNewDrawer = ({ player }: { player: WhiteboardPlayer }) => {
@@ -66,6 +110,12 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
         status: 'success',
       });
       setIsDrawerState(whiteboardController.isDrawer());
+      setDrawer(whiteboardController.drawer);
+      setViewers(whiteboardController.viewers);
+      setCollaborators({
+        newDrawer: whiteboardController.drawer,
+        newViewers: whiteboardController.viewers,
+      });
     };
 
     const handleLeave = ({ player }: { player: WhiteboardPlayer }) => {
@@ -75,6 +125,12 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
         status: 'info',
       });
       setIsDrawerState(whiteboardController.isDrawer());
+      setDrawer(whiteboardController.drawer);
+      setViewers(whiteboardController.viewers);
+      setCollaborators({
+        newDrawer: whiteboardController.drawer,
+        newViewers: whiteboardController.viewers,
+      });
     };
 
     const handleNewScene = ({ elements }: { elements: ExcalidrawElement[] }) => {
@@ -83,33 +139,77 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
       });
     };
 
+    const handlePointerUpdate = ({
+      player,
+      payload,
+    }: {
+      player: WhiteboardPlayer;
+      payload: Payload;
+    }) => {
+      const currentCollabs = excalidrawState?.getAppState().collaborators;
+      const playerInfo = currentCollabs?.get(player.id);
+      console.log('pointer update for player', player.userName);
+      currentCollabs?.set(player.id, {
+        ...playerInfo,
+        pointer: {
+          ...payload.pointer,
+        },
+        button: payload.button,
+      });
+
+      excalidrawState?.updateScene({
+        collaborators: new Map(currentCollabs),
+      });
+    };
+
     whiteboardController.addListener('whiteboardPlayerJoin', handleJoin);
     whiteboardController.addListener('whiteboardNewDrawer', handleNewDrawer);
     whiteboardController.addListener('whiteboardPlayerLeave', handleLeave);
     whiteboardController.addListener('whiteboardNewScene', handleNewScene);
+    whiteboardController.addListener('whiteboardPointerUpdate', handlePointerUpdate);
 
     return () => {
       whiteboardController.removeListener('whiteboardPlayerJoin', handleJoin);
       whiteboardController.removeListener('whiteboardNewDrawer', handleNewDrawer);
       whiteboardController.removeListener('whiteboardPlayerLeave', handleLeave);
       whiteboardController.removeListener('whiteboardNewScene', handleNewScene);
+      whiteboardController.removeListener('whiteboardPointerUpdate', handlePointerUpdate);
     };
-  }, [whiteboardController, toast, townController.ourPlayer.id, excalidrawState, whiteboardToast]);
+  }, [
+    whiteboardController,
+    toast,
+    townController.ourPlayer.id,
+    excalidrawState,
+    whiteboardToast,
+    setCollaborators,
+  ]);
 
   return (
     <>
-      <Box h={'xl'} w={['sm', 'xl', '6xl']}>
+      <VStack h={'2xl'} w={['sm', '2xl', '6xl']} margin={2}>
         <Excalidraw
           ref={refCallback}
           isCollaborating={true}
           viewModeEnabled={!isDrawerState}
-          onChange={element => {
+          onChange={throttle(element => {
             if (isDrawerState) {
               whiteboardController.boardChange(element);
             }
-          }}
+          }, THROTTLE_TIMEOUT)}
+          onPointerUpdate={throttle(payload => {
+            whiteboardController.pointerChange(payload);
+          }, THROTTLE_TIMEOUT)}
         />
-      </Box>
+      </VStack>
     </>
   );
 }
+
+export type Payload = {
+  pointer: {
+    x: number;
+    y: number;
+  };
+  button: 'down' | 'up';
+  pointersMap: Gesture['pointers'];
+};

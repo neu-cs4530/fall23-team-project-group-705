@@ -212,7 +212,7 @@ interface InteractableCommandBase {
 
 export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<PictionaryMove> | LeaveGameCommand | StartGameCommand | WhiteboardCommand;
 
-export type WhiteboardCommand = WhiteboardJoin | WhiteboardLeave | WhiteboardChange
+export type WhiteboardCommand = WhiteboardJoin | WhiteboardLeave | WhiteboardChange | WhiteboardPointerChange
 
 export type WhiteboardJoin = {
   type: 'WhiteboardJoin';
@@ -225,6 +225,11 @@ export type WhiteboardLeave = {
 export type WhiteboardChange = {
   type: 'WhiteboardChange';
   elements: unknown;
+}
+
+export type WhiteboardPointerChange = {
+  type: 'WhiteboardPointerChange';
+  payload: unknown;
 }
 
 export interface ViewingAreaUpdateCommand  {
@@ -274,7 +279,7 @@ export interface ServerToClientEvents {
   whiteboardReponse: (response: WhiteboardServerResponse) => void;
 }
 
-export type WhiteboardServerResponse = WhiteboardPlayerJoin | WhiteboardPlayerLeave | WhiteboardDrawerChange;
+export type WhiteboardServerResponse = WhiteboardPlayerJoin | WhiteboardPlayerLeave | WhiteboardDrawerChange | WhiteboardPointerUpdate;
 
 export type WhiteboardPlayer = {
   id: string;
@@ -304,6 +309,13 @@ export type WhiteboardDrawerChange = {
   id: string;
   type: "WhiteboardDrawerChange";
   elements: unknown;
+}
+
+export type WhiteboardPointerUpdate = {
+  id: string;
+  type: "WhiteboardPointerUpdate";
+  player: WhiteboardPlayer;
+  payload: unknown;
 }
 
 

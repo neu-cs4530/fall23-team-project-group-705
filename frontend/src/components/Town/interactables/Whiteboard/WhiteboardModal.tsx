@@ -13,6 +13,7 @@ export default function WhiteboardModal(): JSX.Element {
     if (whiteboardArea) {
       const whiteboardController = townController.getWhiteboardAreaController(whiteboardArea.id);
       whiteboardController.joinArea();
+      townController.pause();
     }
   }, [townController, whiteboardArea]);
 
@@ -21,14 +22,15 @@ export default function WhiteboardModal(): JSX.Element {
       townController.interactEnd(whiteboardArea);
       const whiteboardController = townController.getWhiteboardAreaController(whiteboardArea.id);
       whiteboardController.leaveArea();
+      townController.unPause();
     }
   }, [townController, whiteboardArea]);
 
   if (whiteboardArea) {
     return (
-      <Modal isOpen={whiteboardArea !== undefined} onClose={onClose}>
+      <Modal isOpen={whiteboardArea !== undefined} onClose={onClose} trapFocus={false}>
         <ModalOverlay />
-        <ModalContent maxW={'fit-content'} maxH={'fit-content'} margin={'2'}>
+        <ModalContent maxW={'fit-content'} maxH={'fit-content'} marginTop={10}>
           <ModalHeader paddingBottom={0}>Whiteboard</ModalHeader>
           <ModalCloseButton />
           <Whiteboard interactableId={whiteboardArea.id} />
