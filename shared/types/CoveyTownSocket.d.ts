@@ -212,7 +212,7 @@ interface InteractableCommandBase {
 
 export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<PictionaryMove> | LeaveGameCommand | StartGameCommand | WhiteboardCommand;
 
-export type WhiteboardCommand = WhiteboardJoin | WhiteboardLeave | WhiteboardChange | WhiteboardPointerChange
+export type WhiteboardCommand = WhiteboardJoin | WhiteboardLeave | WhiteboardChange | WhiteboardPointerChange | WhiteboardDrawerChange
 
 export type WhiteboardJoin = {
   type: 'WhiteboardJoin';
@@ -230,6 +230,11 @@ export type WhiteboardChange = {
 export type WhiteboardPointerChange = {
   type: 'WhiteboardPointerChange';
   payload: unknown;
+}
+
+export type WhiteboardDrawerChange = {
+  type: 'WhiteboardDrawerChange';
+  newDrawerId: string;
 }
 
 export interface ViewingAreaUpdateCommand  {
@@ -279,7 +284,7 @@ export interface ServerToClientEvents {
   whiteboardReponse: (response: WhiteboardServerResponse) => void;
 }
 
-export type WhiteboardServerResponse = WhiteboardPlayerJoin | WhiteboardPlayerLeave | WhiteboardDrawerChange | WhiteboardPointerUpdate;
+export type WhiteboardServerResponse = WhiteboardPlayerJoin | WhiteboardPlayerLeave | WhiteboardNewScene| WhiteboardPointerUpdate | WhiteboardNewDrawer;
 
 export type WhiteboardPlayer = {
   id: string;
@@ -305,9 +310,9 @@ export type WhiteboardPlayerLeave = {
   viewers: WhiteboardPlayer[];
 }
 
-export type WhiteboardDrawerChange = {
+export type WhiteboardNewScene = {
   id: string;
-  type: "WhiteboardDrawerChange";
+  type: "WhiteboardNewScene";
   elements: unknown;
 }
 
@@ -318,6 +323,12 @@ export type WhiteboardPointerUpdate = {
   payload: unknown;
 }
 
+export type WhiteboardNewDrawer = {
+  id: string;
+  type: "WhiteboardNewDrawer";
+  drawer: WhiteboardPlayer | undefined;
+  viewers: WhiteboardPlayer[];
+}
 
 export interface ClientToServerEvents {
   chatMessage: (message: ChatMessage) => void;

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { AlertStatus, VStack, useToast } from '@chakra-ui/react';
+import { AlertStatus, VStack, useToast, Select, HStack, Button } from '@chakra-ui/react';
 
 import { Excalidraw } from '@excalidraw/excalidraw';
 import useTownController from '../../../../hooks/useTownController';
@@ -21,7 +21,6 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
   );
 
   const [isDrawerState, setIsDrawerState] = useState<boolean>(false);
-  const [drawer, setDrawer] = useState(whiteboardController.drawer);
   const [viewers, setViewers] = useState(whiteboardController.viewers);
 
   const toast = useToast();
@@ -91,7 +90,6 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
         status: 'info',
       });
       setIsDrawerState(whiteboardController.isDrawer());
-      setDrawer(whiteboardController.drawer);
       setViewers(whiteboardController.viewers);
       setCollaborators({
         newDrawer: whiteboardController.drawer,
@@ -110,7 +108,6 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
         status: 'success',
       });
       setIsDrawerState(whiteboardController.isDrawer());
-      setDrawer(whiteboardController.drawer);
       setViewers(whiteboardController.viewers);
       setCollaborators({
         newDrawer: whiteboardController.drawer,
@@ -125,7 +122,6 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
         status: 'info',
       });
       setIsDrawerState(whiteboardController.isDrawer());
-      setDrawer(whiteboardController.drawer);
       setViewers(whiteboardController.viewers);
       setCollaborators({
         newDrawer: whiteboardController.drawer,
@@ -187,6 +183,33 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
   return (
     <>
       <VStack h={'2xl'} w={['sm', '2xl', '6xl']} margin={2}>
+        {isDrawerState && (
+          <form
+            onSubmit={event => {
+              event.preventDefault();
+              const newDrawerId = (event.target as any).drawerId.value;
+              if (!newDrawerId) {
+                whiteboardToast({
+                  title: 'No new drawer selected',
+                  description: 'Need to select a new drawer to change',
+                  status: 'error',
+                });
+                return;
+              }
+              whiteboardController.drawerChange(newDrawerId);
+            }}>
+            <HStack justify={'center'}>
+              <Select placeholder='Select new drawer' w={'2xs'} name={'drawerId'}>
+                {viewers.map(viewer => (
+                  <option key={viewer.id} value={viewer.id}>
+                    {viewer.userName}
+                  </option>
+                ))}
+              </Select>
+              <Button type='submit'>Change Drawer</Button>
+            </HStack>
+          </form>
+        )}
         <Excalidraw
           ref={refCallback}
           isCollaborating={true}

@@ -82,12 +82,16 @@ export default class WhiteboardAreaController extends InteractableAreaController
       );
     }
 
-    if (response.type === 'WhiteboardDrawerChange') {
+    if (response.type === 'WhiteboardNewScene') {
       this._handleDrawerChange(response.elements);
     }
 
     if (response.type === 'WhiteboardPointerUpdate') {
       this._handlePointerUpdate(response.player, response.payload);
+    }
+
+    if (response.type === 'WhiteboardNewDrawer') {
+      this._handleNewDrawer(response.drawer, response.viewers);
     }
   }
 
@@ -150,6 +154,14 @@ export default class WhiteboardAreaController extends InteractableAreaController
     });
   }
 
+  private _handleNewDrawer(drawer: WhiteboardPlayer | undefined, viewers: WhiteboardPlayer[]) {
+    this._model.drawer = drawer;
+    this._model.viewers = viewers;
+    this.emit('whiteboardNewDrawer', {
+      player: drawer,
+    });
+  }
+
   /**
    * A whiteboard area is empty if there are no occupants in it, or the topic is undefined.
    */
@@ -197,5 +209,12 @@ export default class WhiteboardAreaController extends InteractableAreaController
         payload,
       });
     }
+  }
+
+  public async drawerChange(newDrawerId: string) {
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'WhiteboardDrawerChange',
+      newDrawerId,
+    });
   }
 }

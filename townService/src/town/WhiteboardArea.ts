@@ -117,6 +117,10 @@ export default class WhiteboardArea extends InteractableArea {
       this._handleWhiteboardPointerChange(player, command.payload);
     }
 
+    if (command.type === 'WhiteboardDrawerChange') {
+      this._handleWhiteboardDrawerChange(player, command.newDrawerId);
+    }
+
     return undefined as InteractableCommandReturnType<CommandType>;
   }
 
@@ -213,7 +217,7 @@ export default class WhiteboardArea extends InteractableArea {
   private _handleWhiteboardChange(player: Player, elements: unknown) {
     player.townEmitter.emit('whiteboardReponse', {
       id: this.id,
-      type: 'WhiteboardDrawerChange',
+      type: 'WhiteboardNewScene',
       elements,
     });
 
@@ -229,6 +233,28 @@ export default class WhiteboardArea extends InteractableArea {
         userName: player.userName,
       },
       payload,
+    });
+  }
+
+  private _handleWhiteboardDrawerChange(player: Player, newDrawerId: string) {
+    const newDrawer = this._viewers.find(viewer => viewer.id === newDrawerId);
+    this._viewers = this._viewers.filter(viewer => viewer.id !== newDrawerId);
+    if (this._drawer) {
+      this._viewers.push(this._drawer);
+    }
+    this._drawer = newDrawer;
+
+    this._emitWhiteboardEvent({
+      id: this.id,
+      type: 'WhiteboardNewDrawer',
+      drawer: this._drawer && {
+        id: this._drawer.id,
+        userName: this._drawer.userName,
+      },
+      viewers: this._viewers.map(viewer => ({
+        id: viewer.id,
+        userName: viewer.userName,
+      })),
     });
   }
 
