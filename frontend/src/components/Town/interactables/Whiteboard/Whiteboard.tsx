@@ -98,14 +98,14 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
     };
 
     const handleNewDrawer = ({ player }: { player: WhiteboardPlayer }) => {
-      const message =
-        player.id === townController.ourPlayer.id
-          ? `You have become the Drawer, the holder of Excalidraw`
-          : `${player.userName} has become the Drawer, the holder of Excalidraw`;
+      const isNewDrawer = player.id === townController.ourPlayer.id;
+      const message = isNewDrawer
+        ? `You have become the Drawer, the holder of Excalidraw`
+        : `${player.userName} has become the Drawer, the holder of Excalidraw`;
       whiteboardToast({
         title: `New Drawer has emerged!`,
         description: message,
-        status: 'success',
+        status: isNewDrawer ? 'success' : 'info',
       });
       setIsDrawerState(whiteboardController.isDrawer());
       setViewers(whiteboardController.viewers);
