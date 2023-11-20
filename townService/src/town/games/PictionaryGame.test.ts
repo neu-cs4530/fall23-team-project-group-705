@@ -35,6 +35,7 @@ describe('PictionaryGame', () => {
     let player1: Player;
     let player2: Player;
     let player3: Player;
+    let player4: Player;
     const makeCorrectGuess: (playerID: PlayerID) => GameMove<PictionaryMove> = (
       playerID: PlayerID,
     ) => ({
@@ -61,6 +62,7 @@ describe('PictionaryGame', () => {
       player1 = createPlayerForTesting();
       player2 = createPlayerForTesting();
       player3 = createPlayerForTesting();
+      player4 = createPlayerForTesting();
     });
     describe('once the game has started', () => {
       beforeEach(() => {
@@ -80,7 +82,7 @@ describe('PictionaryGame', () => {
         expect(() => game.join(player2)).toThrowError(PLAYER_ALREADY_IN_GAME_MESSAGE);
       });
       it('should throw error when the leave() enter a new player', () => {
-        expect(() => game.leave(player3)).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
+        expect(() => game.leave(player4)).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
       });
       it('should end the game when there is no player', () => {
         game.leave(player1);
