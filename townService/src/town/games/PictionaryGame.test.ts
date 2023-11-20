@@ -76,7 +76,7 @@ describe('PictionaryGame', () => {
       });
       it('should throw error when game is started', () => {
         game.state.status = 'IN_PROGRESS';
-        expect(() => game.join(player3)).toThrowError(GAME_STARTED_MESSAGE);
+        expect(() => game.join(player4)).toThrowError(GAME_STARTED_MESSAGE);
       });
       it('should throw error when the a player join twice', () => {
         expect(() => game.join(player2)).toThrowError(PLAYER_ALREADY_IN_GAME_MESSAGE);
