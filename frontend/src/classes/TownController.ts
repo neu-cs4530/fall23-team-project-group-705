@@ -28,7 +28,7 @@ import {
 } from '../types/CoveyTownSocket';
 import {
   isConversationArea,
-  isDrawingArea,
+  isWhiteboardArea,
   isPictionaryArea,
   isTicTacToeArea,
   isViewingArea,
@@ -40,9 +40,10 @@ import InteractableAreaController, {
 } from './interactable/InteractableAreaController';
 import TicTacToeAreaController from './interactable/TicTacToeAreaController';
 import ViewingAreaController from './interactable/ViewingAreaController';
-import DrawingAreaController from './interactable/DrawingAreaController';
+import WhiteboardAreaController from './interactable/WhiteboardAreaController';
 import PictionaryAreaController from './interactable/PictionaryAreaController';
 import PlayerController from './PlayerController';
+import WhiteboardArea from '../components/Town/interactables/Whiteboard/WhiteboardArea';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -448,6 +449,16 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         console.trace(err);
       }
     });
+
+    this._socket.on('whiteboardReponse', response => {
+      try {
+        const controller = this.getWhiteboardAreaController(response.id);
+        controller.handleServerResponse(response);
+      } catch (err) {
+        console.error('Error with whiteboard', response);
+        console.trace(err);
+      }
+    });
   }
 
   /**
@@ -558,13 +569,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   /**
-   * Create a new drawing area, sending the request to the townService. Throws an error if the request
-   * is not successful. Does not immediately update local state about the new drawing area - it will be
+   * Create a new whiteboard area, sending the request to the townService. Throws an error if the request
+   * is not successful. Does not immediately update local state about the new whiteboard area - it will be
    * updated once the townService creates the area and emits an interactableUpdate
    *
    * @param newArea
    */
-  async createDrawingArea(newArea: { id: string; occupants: Array<string> }) {
+  async createWhiteboardArea(newArea: { id: string; occupants: Array<string> }) {
+    // TODO: create a whiteboard for the whiteboardArea
     await this._townsService.createConversationArea(this.townID, this.sessionToken, newArea);
   }
 
@@ -620,12 +632,9 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             );
           } else if (isViewingArea(eachInteractable)) {
             this._interactableControllers.push(new ViewingAreaController(eachInteractable));
-          } else if (isDrawingArea(eachInteractable)) {
+          } else if (isWhiteboardArea(eachInteractable)) {
             this._interactableControllers.push(
-              DrawingAreaController.fromDrawingAreaModel(
-                eachInteractable,
-                this._playersByIDs.bind(this),
-              ),
+              new WhiteboardAreaController(eachInteractable.id, eachInteractable, this),
             );
           } else if (isPictionaryArea(eachInteractable)) {
             this._interactableControllers.push(
@@ -646,6 +655,17 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         reject(new Error('Invalid town ID'));
       });
     });
+  }
+
+  public getWhiteboardAreaController(whiteboardAreaId: string): WhiteboardAreaController {
+    const existingController = this._interactableControllers.find(
+      eachExistingArea => eachExistingArea.id === whiteboardAreaId,
+    );
+    if (existingController instanceof WhiteboardAreaController) {
+      return existingController;
+    } else {
+      throw new Error(`No such whiteboard area controller with id ${whiteboardAreaId}`);
+    }
   }
 
   /**

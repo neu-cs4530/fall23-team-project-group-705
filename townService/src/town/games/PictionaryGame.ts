@@ -7,9 +7,15 @@ import InvalidParametersError, {
   PLAYER_ALREADY_GUESSED_MESSAGE,
   DRAWER_UNDEFINED_MESSAGE,
   DRAWER_NOT_IN_GAME_MESSAGE,
+  TURN_ENDED_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
-import { GameMove, PictionaryGameState, PictionaryMove } from '../../types/CoveyTownSocket';
+import {
+  GameMove,
+  PictionaryGameState,
+  PictionaryMove,
+  PlayerID,
+} from '../../types/CoveyTownSocket';
 import Game from './Game';
 import PICTIONARY_WORDLIST from './PictionaryWordlist';
 
@@ -18,6 +24,12 @@ import PICTIONARY_WORDLIST from './PictionaryWordlist';
  */
 export default class PictionaryGame extends Game<PictionaryGameState, PictionaryMove> {
   private _wordlist: string[];
+
+  // The length, in seconds. of one drawer's turn.
+  public static readonly turnLength = 30;
+
+  // The length, in seconds, between turns.
+  public static readonly intermissionLength = 5;
 
   public constructor() {
     super({
@@ -40,6 +52,9 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     }
     if (this.state.alreadyGuessedCorrectly?.some(pID => pID === move.guesser)) {
       throw new InvalidParametersError(PLAYER_ALREADY_GUESSED_MESSAGE);
+    }
+    if (this.state.betweenTurns) {
+      throw new InvalidParametersError(TURN_ENDED_MESSAGE);
     }
   }
 
@@ -68,7 +83,17 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
         scores: newScores,
       };
 
-      // Check for turn end
+      const numCorrect = this.state.alreadyGuessedCorrectly
+        ? this.state.alreadyGuessedCorrectly.length
+        : 1;
+      if (numCorrect >= this._players.length - 1) {
+        // If all guessers have guessed correctly, end the turn.
+        this.state = {
+          ...this.state,
+          timer: 0,
+          betweenTurns: true,
+        };
+      }
     } else {
       // Guess was incorrect
     }
@@ -128,9 +153,37 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   }
 
   /**
-   * A function meant to be called by setInterval once a second. Updates game timer and handles turn changes.
+   * A function meant to be called once a second. Updates game timer and handles turn changes.
    */
-  public tick(): void {}
+  public tick(): void {
+    if (this.state.status === 'IN_PROGRESS') {
+      let timer = this.state.timer + 1;
+      let betweenTurns: boolean;
+
+      if (this.state.betweenTurns) {
+        // In an intermission
+        if (timer > PictionaryGame.intermissionLength) {
+          this.nextTurn();
+          betweenTurns = false;
+          timer = 0;
+        } else {
+          betweenTurns = true;
+        }
+      } else if (timer > PictionaryGame.turnLength) {
+        // In a turn
+        betweenTurns = true;
+        timer = 0;
+      } else {
+        betweenTurns = false;
+      }
+
+      this.state = {
+        ...this.state,
+        timer,
+        betweenTurns,
+      };
+    }
+  }
 
   /**
    * Gets a random new word that has not been seen in this game before from the wordlist.
@@ -179,18 +232,24 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
     }
 
-    if (this._players.length === 1) {
+    const indexOfPlayer: number = this._players.indexOf(player);
+
+    if (this._players.length <= 1 || indexOfPlayer === this._players.length - 1) {
       this.state = {
         ...this.state,
         status: 'OVER',
+        winner: this._inTheLead(),
       };
-    }
-
-    if (this.state.drawer === player.id) {
-      const indexOfplayer: number = this._players.indexOf(player);
-      if (indexOfplayer !== -1 && indexOfplayer < this._players.length - 1) {
-        this.state.drawer = this._players[indexOfplayer + 1].id;
-      }
+    } else if (
+      this.state.drawer === player.id &&
+      indexOfPlayer !== -1 &&
+      indexOfPlayer < this._players.length - 1
+    ) {
+      const drawer = this._players[indexOfPlayer + 1].id;
+      this.state = {
+        ...this.state,
+        drawer,
+      };
     }
   }
 
@@ -206,13 +265,45 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   }
 
   public nextTurn(): void {
-    const indexOfplayer: number = this._players.indexOf(this._findDrawer());
-    if (indexOfplayer === this._players.length - 1) {
-      this.state.status = 'OVER';
+    const indexOfDrawer: number = this._players.indexOf(this._findDrawer());
+    if (indexOfDrawer >= this._players.length - 1) {
+      this.state = {
+        ...this.state,
+        status: 'OVER',
+        winner: this._inTheLead(),
+      };
+    } else if (indexOfDrawer !== -1 && indexOfDrawer < this._players.length - 1) {
+      const drawer = this._players[indexOfDrawer + 1].id;
+      const alreadyGuessedCorrectly: PlayerID[] = [];
+      this.state = {
+        ...this.state,
+        drawer,
+        alreadyGuessedCorrectly,
+      };
+      this.newWord();
     }
-    if (indexOfplayer !== -1 && indexOfplayer < this._players.length - 1) {
-      this.state.drawer = this._players[indexOfplayer + 1].id;
-      this._players.splice(indexOfplayer, 1);
+  }
+
+  // Returns the player with the most points, or undefined if there is a tie.
+  private _inTheLead(): PlayerID | undefined {
+    let maxScore = 0;
+    let maxScorePlayerID: PlayerID | undefined;
+    const { scores } = this.state;
+
+    if (scores) {
+      this._players.forEach(({ id }) => {
+        const score = scores[id];
+        if (score !== undefined) {
+          if (score > maxScore) {
+            maxScore = score;
+            maxScorePlayerID = id;
+          } else if (score === maxScore) {
+            maxScorePlayerID = undefined;
+          }
+        }
+      });
     }
+
+    return maxScorePlayerID;
   }
 }

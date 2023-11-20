@@ -1,9 +1,7 @@
-import Interactable, { KnownInteractableTypes } from '../Interactable';
+import Interactable, { KnownInteractableTypes } from '../../Interactable';
 
-export default class DrawingArea extends Interactable {
+export default class WhiteboardArea extends Interactable {
   private _isInteracting = false;
-
-  private _isAdmin = false;
 
   addedToScene() {
     super.addedToScene();
@@ -30,6 +28,6 @@ export default class DrawingArea extends Interactable {
   }
 
   getType(): KnownInteractableTypes {
-    return 'drawingArea';
+    return 'whiteboardArea';
   }
 }

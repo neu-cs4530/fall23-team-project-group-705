@@ -23,6 +23,7 @@ import ConversationArea from './ConversationArea';
 import GameAreaFactory from './games/GameAreaFactory';
 import InteractableArea from './InteractableArea';
 import ViewingArea from './ViewingArea';
+import WhiteboardArea from './WhiteboardArea';
 
 /**
  * The Town class implements the logic for each town: managing the various events that
@@ -404,9 +405,16 @@ export default class Town {
       .filter(eachObject => eachObject.type === 'GameArea')
       .map(eachGameAreaObj => GameAreaFactory(eachGameAreaObj, this._broadcastEmitter));
 
+    const whiteboardAreas = objectLayer.objects
+      .filter(eachObject => eachObject.type === 'WhiteboardArea')
+      .map(eachConvAreaObj =>
+        WhiteboardArea.fromMapObject(eachConvAreaObj, this._broadcastEmitter),
+      );
+
     this._interactables = this._interactables
       .concat(viewingAreas)
       .concat(conversationAreas)
+      .concat(whiteboardAreas)
       .concat(gameAreas);
     this._validateInteractables();
   }

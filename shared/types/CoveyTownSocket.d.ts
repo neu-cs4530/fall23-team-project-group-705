@@ -17,7 +17,7 @@ export type TownJoinResponse = {
   interactables: TypedInteractable[];
 }
 
-export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'DrawingArea' | 'PictionaryArea';
+export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'WhiteboardArea' | 'PictionaryArea';
 export interface Interactable {
   type: InteractableType;
   id: InteractableID;
@@ -60,10 +60,11 @@ export type ChatMessage = {
 export interface ConversationArea extends Interactable {
   topic?: string;
 };
-export interface DrawingArea extends Interactable {
-  // TODO: Add boardstate here
-  board?: any;
+export interface WhiteboardArea extends Interactable {
+  drawer: WhiteboardPlayer | undefined;
+  viewers: WhiteboardPlayer[];
 };
+
 export interface PictionaryArea extends Interactable {
   // TODO: Add boardstate here
   board?: any;
@@ -209,7 +210,33 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<PictionaryMove> | LeaveGameCommand | StartGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<PictionaryMove> | LeaveGameCommand | StartGameCommand | WhiteboardCommand;
+
+export type WhiteboardCommand = WhiteboardJoin | WhiteboardLeave | WhiteboardChange | WhiteboardPointerChange | WhiteboardDrawerChange
+
+export type WhiteboardJoin = {
+  type: 'WhiteboardJoin';
+}
+
+export type WhiteboardLeave = {
+  type: 'WhiteboardLeave';
+}
+
+export type WhiteboardChange = {
+  type: 'WhiteboardChange';
+  elements: unknown;
+}
+
+export type WhiteboardPointerChange = {
+  type: 'WhiteboardPointerChange';
+  payload: unknown;
+}
+
+export type WhiteboardDrawerChange = {
+  type: 'WhiteboardDrawerChange';
+  newDrawerId: string;
+}
+
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
@@ -254,6 +281,53 @@ export interface ServerToClientEvents {
   chatMessage: (message: ChatMessage) => void;
   interactableUpdate: (interactable: Interactable) => void;
   commandResponse: (response: InteractableCommandResponse) => void;
+  whiteboardReponse: (response: WhiteboardServerResponse) => void;
+}
+
+export type WhiteboardServerResponse = WhiteboardPlayerJoin | WhiteboardPlayerLeave | WhiteboardNewScene| WhiteboardPointerUpdate | WhiteboardNewDrawer;
+
+export type WhiteboardPlayer = {
+  id: string;
+  userName: string;
+}
+
+export type WhiteboardPlayerJoin = {
+  id: string
+  type: "WhiteboardPlayerJoin";
+  player: WhiteboardPlayer;
+  isDrawer: boolean;
+  drawer: WhiteboardPlayer | undefined;
+  viewers: WhiteboardPlayer[];
+  elements: unknown;
+}
+
+export type WhiteboardPlayerLeave = {
+  id: string
+  type: "WhiteboardPlayerLeave";
+  player: WhiteboardPlayer;
+  isDrawer: boolean;
+  drawer: WhiteboardPlayer | undefined;
+  viewers: WhiteboardPlayer[];
+}
+
+export type WhiteboardNewScene = {
+  id: string;
+  type: "WhiteboardNewScene";
+  elements: unknown;
+}
+
+export type WhiteboardPointerUpdate = {
+  id: string;
+  type: "WhiteboardPointerUpdate";
+  player: WhiteboardPlayer;
+  payload: unknown;
+}
+
+export type WhiteboardNewDrawer = {
+  id: string;
+  type: "WhiteboardNewDrawer";
+  drawer: WhiteboardPlayer | undefined;
+  viewers: WhiteboardPlayer[];
 }
 
 export interface ClientToServerEvents {
