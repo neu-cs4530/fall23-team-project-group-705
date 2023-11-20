@@ -16,9 +16,12 @@ export default class WhiteboardArea extends InteractableArea {
 
   private _viewers: Player[] = [];
 
+  // A copy of the drawer board, will be deleted when the last person leave the room
+  private _elements: unknown;
+
   /** The whiteboard area is "active" when there are players inside of it  */
   public get isActive(): boolean {
-    return this._occupants.length > 0;
+    return this._drawer !== undefined || this._viewers.length > 0;
   }
 
   /**
@@ -105,6 +108,19 @@ export default class WhiteboardArea extends InteractableArea {
     if (command.type === 'WhiteboardLeave') {
       this._handleWhiteboardLeave(player);
     }
+
+    if (command.type === 'WhiteboardChange') {
+      this._handleWhiteboardChange(player, command.elements);
+    }
+
+    if (command.type === 'WhiteboardPointerChange') {
+      this._handleWhiteboardPointerChange(player, command.payload);
+    }
+
+    if (command.type === 'WhiteboardDrawerChange') {
+      this._handleWhiteboardDrawerChange(player, command.newDrawerId);
+    }
+
     return undefined as InteractableCommandReturnType<CommandType>;
   }
 
@@ -120,6 +136,7 @@ export default class WhiteboardArea extends InteractableArea {
     }
 
     this._emitWhiteboardEvent({
+      id: this.id,
       type: 'WhiteboardPlayerJoin',
       player: {
         id: player.id,
@@ -134,6 +151,7 @@ export default class WhiteboardArea extends InteractableArea {
         id: viewer.id,
         userName: viewer.userName,
       })),
+      elements: this._elements,
     });
   }
 
@@ -144,7 +162,10 @@ export default class WhiteboardArea extends InteractableArea {
         this._drawer = this._viewers.shift();
       }
 
+      this._resetWhiteboardState();
+
       this._emitWhiteboardEvent({
+        id: this.id,
         type: 'WhiteboardPlayerLeave',
         player: {
           id: player.id,
@@ -166,8 +187,10 @@ export default class WhiteboardArea extends InteractableArea {
 
     if (this._viewers.some(viewer => viewer.id === player.id)) {
       this._viewers = this._viewers.filter(viewer => viewer.id !== player.id);
+      this._resetWhiteboardState();
 
       this._emitWhiteboardEvent({
+        id: this.id,
         type: 'WhiteboardPlayerLeave',
         player: {
           id: player.id,
@@ -183,18 +206,67 @@ export default class WhiteboardArea extends InteractableArea {
           userName: viewer.userName,
         })),
       });
+
       return;
     }
 
     throw new InvalidParametersError(`Player with username: ${player.userName} doesn't exist`);
   }
 
-  private _emitWhiteboardEvent(content: Omit<WhiteboardServerResponse, 'id'>) {
+  // elements is left as unknown since I didn't want to install excalidraw to the backend just for the types
+  private _handleWhiteboardChange(player: Player, elements: unknown) {
+    player.townEmitter.emit('whiteboardReponse', {
+      id: this.id,
+      type: 'WhiteboardNewScene',
+      elements,
+    });
+
+    this._elements = elements;
+  }
+
+  private _handleWhiteboardPointerChange(player: Player, payload: unknown) {
+    player.townEmitter.emit('whiteboardReponse', {
+      id: this.id,
+      type: 'WhiteboardPointerUpdate',
+      player: {
+        id: player.id,
+        userName: player.userName,
+      },
+      payload,
+    });
+  }
+
+  private _handleWhiteboardDrawerChange(player: Player, newDrawerId: string) {
+    const newDrawer = this._viewers.find(viewer => viewer.id === newDrawerId);
+    this._viewers = this._viewers.filter(viewer => viewer.id !== newDrawerId);
+    if (this._drawer) {
+      this._viewers.push(this._drawer);
+    }
+    this._drawer = newDrawer;
+
+    this._emitWhiteboardEvent({
+      id: this.id,
+      type: 'WhiteboardNewDrawer',
+      drawer: this._drawer && {
+        id: this._drawer.id,
+        userName: this._drawer.userName,
+      },
+      viewers: this._viewers.map(viewer => ({
+        id: viewer.id,
+        userName: viewer.userName,
+      })),
+    });
+  }
+
+  private _resetWhiteboardState() {
+    if (!this.isActive) {
+      this._elements = [];
+    }
+  }
+
+  private _emitWhiteboardEvent(content: WhiteboardServerResponse) {
     try {
-      this._townEmitter.emit('whiteboardReponse', {
-        id: this.id,
-        ...content,
-      });
+      this._townEmitter.emit('whiteboardReponse', content);
     } catch (err) {
       console.error(err);
     }
