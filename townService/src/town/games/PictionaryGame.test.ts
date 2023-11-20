@@ -85,6 +85,7 @@ describe('PictionaryGame', () => {
       it('should end the game when there is no player', () => {
         game.leave(player1);
         game.leave(player2);
+        game.leave(player3);
         expect(game.state.status).toEqual('OVER');
       });
       it('should change the drawer when drawer leaves', () => {
