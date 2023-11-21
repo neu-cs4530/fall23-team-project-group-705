@@ -36,6 +36,7 @@ import {
   PlayerID,
 } from '../../../../types/CoveyTownSocket';
 import GameAreaInteractable from '../GameArea';
+import TimerDisplay from './TimerDisplay';
 
 /**
  * The PictionaryArea component renders the Pictionary game area.
@@ -79,14 +80,9 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   const [joiningGame, setJoiningGame] = useState(false);
   const [drawer, setDrawer] = useState<PlayerController | undefined>(gameAreaController.drawer);
   const [currentWord, setCurrentWord] = useState<string>(gameAreaController.currentWord);
-  const [timer, setTimer] = useState(gameAreaController.timer);
   const [betweenTurns, setBetweenTurns] = useState(gameAreaController.betweenTurns);
   const [guess, setGuess] = useState('');
   const toast = useToast();
-
-  // TODO: Put these in a single point of control
-  const turnLength = 30;
-  const intermissionLength = 5;
 
   useEffect(() => {
     const updateGameState = () => {
@@ -97,7 +93,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       setDrawer(gameAreaController.drawer);
       setCurrentWord(gameAreaController.currentWord);
       setBetweenTurns(gameAreaController.betweenTurns);
-      setTimer(gameAreaController.timer);
       console.log(`game state update, isPlayer: ${gameAreaController.isPlayer}`);
     };
     gameAreaController.addListener('gameUpdated', updateGameState);
@@ -128,7 +123,19 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       gameAreaController.removeListener('gameEnd', onGameEnd);
       gameAreaController.removeListener('gameUpdated', updateGameState);
     };
-  }, [townController, gameAreaController, toast]);
+  }, [townController, 
+      gameAreaController.history,
+      gameAreaController.isPlayer,
+      gameAreaController.status,
+      gameAreaController.observers,
+      gameAreaController.drawer,
+      gameAreaController.currentWord,
+      gameAreaController.betweenTurns,
+      toast]);
+
+  // useEffect(() => {
+  //   setTimer(gameAreaController.timer);
+  // }, [gameAreaController.timer])
 
   let gameStatusText = <></>;
   if (gameStatus === 'IN_PROGRESS') {
@@ -195,6 +202,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
             placeholder='Type your guess here'
             value={guess}
             onChange={event => setGuess(event.target.value)}
+            key='guessInput'
           />
           <Button
             onClick={async () => {
@@ -254,18 +262,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     );
   };
 
-  function TimerDisplay(): JSX.Element {
-    return (
-      <div>
-        {
-          betweenTurns
-          ? `Next turn in ${intermissionLength - timer} seconds`
-          : `${turnLength - timer} seconds remaining`
-        }
-      </div>
-    );
-  }
-
   // Dispalys all info needed for testing pictionary game
   function TestingInfo(): JSX.Element {
     return (
@@ -323,7 +319,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
             Start
           </Button>
           <ListItem>
-            BetweenTurns?: {betweenTurns ? 'true' : 'false'}, Timer: {timer}
+            {/* BetweenTurns?: {betweenTurns ? 'true' : 'false'}, Timer: {timer} */}
           </ListItem>
         </ListItem>
         <ListItem><EndGameScore scores={gameAreaController.scores} /></ListItem>
@@ -370,6 +366,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   function PictionarySidebar(): JSX.Element {
     return (
       <VStack width={250} spacing='12' paddingTop={4}>
+        <TimerDisplay gameAreaController={gameAreaController} />
         {
           gameAreaController.isOurTurn || betweenTurns
           ? <CurrentWordDisplay />
@@ -380,11 +377,10 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     );
   }
 
-  const excalidraw = <Excalidraw />;
   function GameStartedScreen(): JSX.Element {
     return (
       <HStack h={'2xl'} w={['sm', '2xl', '6xl']} alignItems='top' margin={2}>
-        {excalidraw}
+        <Excalidraw />
         <PictionarySidebar />
       </HStack>
     );
