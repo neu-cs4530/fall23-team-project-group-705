@@ -131,12 +131,12 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       </>
     );
   } else {
-    let joinGameButton = <></>;
+    let gameButton = <></>;
     if (
       (gameAreaController.status === 'WAITING_TO_START' && !isPlayer) ||
       gameAreaController.status === 'OVER'
     ) {
-      joinGameButton = (
+      gameButton = (
         <Button
           onClick={async () => {
             setJoiningGame(true);
@@ -156,10 +156,26 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
           Join New Game
         </Button>
       );
+    } else if (gameAreaController.status === 'WAITING_TO_START' && isPlayer) {
+      gameButton = <Button
+        disabled={gameAreaController.players.length < 2}
+        onClick={async () => {
+          try {
+            await gameAreaController.startGame();
+          } catch (e) {
+            toast({
+              title: 'Error starting game',
+              description: (e as Error).toString(),
+              status: 'error',
+            });
+          }
+        }}>
+        Start
+      </Button>
     }
     gameStatusText = (
       <b>
-        Game {gameStatus === 'WAITING_TO_START' ? 'not yet started' : 'over'}. {joinGameButton}
+        Game {gameStatus === 'WAITING_TO_START' ? 'not yet started' : 'over'}. {gameButton}
       </b>
     );
   }
@@ -183,7 +199,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   };
 
   // Dispalys all info needed for testing pictionary game
-  const TestingInfo = () => {
+  function TestingInfo(): JSX.Element {
     return (
       <UnorderedList>
         <ListItem>Current Word: {currentWord}</ListItem>
@@ -250,7 +266,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   function GameNotStartedScreen(): JSX.Element {
     return (
     <div>
-      {TestingInfo}
       <Accordion allowToggle>
         <AccordionItem>
           <Heading as='h3'>
