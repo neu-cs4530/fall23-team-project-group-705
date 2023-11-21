@@ -182,13 +182,9 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     );
   };
 
-  const guessButtonHandler = () => {
-    console.log(`guess button clicked with guess ${guess}`);
-  };
-
-  return (
-    <Container>
-      {/* This list is for displaying testing/development info */}
+  // Dispalys all info needed for testing pictionary game
+  const TestingInfo = () => {
+    return (
       <UnorderedList>
         <ListItem>Current Word: {currentWord}</ListItem>
         <ListItem>
@@ -203,6 +199,17 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
               try {
                 await gameAreaController.makeGuess(guess).then(() => {
                   setGuess('');
+                  if (gameAreaController.weAlreadyGuessedCorrectly) {
+                    toast({
+                      title: 'Correct!',
+                      status: 'success',
+                    });
+                  } else {
+                    toast({
+                      title: 'Incorrect.',
+                      status: 'error',
+                    });
+                  }
                 });
               } catch (e) {
                 toast({
@@ -237,36 +244,56 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
         </ListItem>
         <ListItem>{EndGameScore(gameAreaController.scores)}</ListItem>
       </UnorderedList>
-      <Accordion allowToggle>
-        <AccordionItem>
-          <Heading as='h3'>
-            <AccordionButton>
-              <Box as='span' flex='1' textAlign='left'>
-                Leaderboard
-                <AccordionIcon />
-              </Box>
-            </AccordionButton>
-          </Heading>
-        </AccordionItem>
-        <AccordionItem>
-          <Heading as='h3'>
-            <AccordionButton>
-              <Box as='span' flex='1' textAlign='left'>
-                Current Observers
-                <AccordionIcon />
-              </Box>
-            </AccordionButton>
-          </Heading>
-          <AccordionPanel>
-            <List aria-label='list of observers in the game'>
-              {observers.map(player => {
-                return <ListItem key={player.id}>{player.userName}</ListItem>;
-              })}
-            </List>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
-      {gameStatusText}
+    )
+  }
+
+  const GameNotStartedScreen = (
+      <div>
+        {TestingInfo}
+        <Accordion allowToggle>
+          <AccordionItem>
+            <Heading as='h3'>
+              <AccordionButton>
+                <Box as='span' flex='1' textAlign='left'>
+                  Leaderboard
+                  <AccordionIcon />
+                </Box>
+              </AccordionButton>
+            </Heading>
+          </AccordionItem>
+          <AccordionItem>
+            <Heading as='h3'>
+              <AccordionButton>
+                <Box as='span' flex='1' textAlign='left'>
+                  Current Observers
+                  <AccordionIcon />
+                </Box>
+              </AccordionButton>
+            </Heading>
+            <AccordionPanel>
+              <List aria-label='list of observers in the game'>
+                {observers.map(player => {
+                  return <ListItem key={player.id}>{player.userName}</ListItem>;
+                })}
+              </List>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+        {gameStatusText}
+      </div>
+    );
+
+    const GameStartedScreen = (
+      <h1>Game Screen</h1>
+    );
+
+  return (
+    <Container>
+      {
+        gameStatus === 'IN_PROGRESS'
+        ? {GameStartedScreen}
+        : {GameNotStartedScreen}
+      }
     </Container>
   );
 }
