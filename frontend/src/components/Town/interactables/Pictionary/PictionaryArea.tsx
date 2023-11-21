@@ -247,52 +247,55 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     )
   }
 
-  const GameNotStartedScreen = (
-      <div>
-        {TestingInfo}
-        <Accordion allowToggle>
-          <AccordionItem>
-            <Heading as='h3'>
-              <AccordionButton>
-                <Box as='span' flex='1' textAlign='left'>
-                  Leaderboard
-                  <AccordionIcon />
-                </Box>
-              </AccordionButton>
-            </Heading>
-          </AccordionItem>
-          <AccordionItem>
-            <Heading as='h3'>
-              <AccordionButton>
-                <Box as='span' flex='1' textAlign='left'>
-                  Current Observers
-                  <AccordionIcon />
-                </Box>
-              </AccordionButton>
-            </Heading>
-            <AccordionPanel>
-              <List aria-label='list of observers in the game'>
-                {observers.map(player => {
-                  return <ListItem key={player.id}>{player.userName}</ListItem>;
-                })}
-              </List>
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
-        {gameStatusText}
-      </div>
-    );
+  function GameNotStartedScreen(): JSX.Element {
+    return (
+    <div>
+      {TestingInfo}
+      <Accordion allowToggle>
+        <AccordionItem>
+          <Heading as='h3'>
+            <AccordionButton>
+              <Box as='span' flex='1' textAlign='left'>
+                Leaderboard
+                <AccordionIcon />
+              </Box>
+            </AccordionButton>
+          </Heading>
+        </AccordionItem>
+        <AccordionItem>
+          <Heading as='h3'>
+            <AccordionButton>
+              <Box as='span' flex='1' textAlign='left'>
+                Current Observers
+                <AccordionIcon />
+              </Box>
+            </AccordionButton>
+          </Heading>
+          <AccordionPanel>
+            <List aria-label='list of observers in the game'>
+              {observers.map(player => {
+                return <ListItem key={player.id}>{player.userName}</ListItem>;
+              })}
+            </List>
+          </AccordionPanel>
+        </AccordionItem>
+      </Accordion>
+      {gameStatusText}
+    </div>
+  )};
 
-    const GameStartedScreen = (
+  function GameStartedScreen(): JSX.Element {
+    return (
       <h1>Game Screen</h1>
     );
+  };
 
   return (
     <Container>
       {
         gameStatus === 'IN_PROGRESS'
-        ? {GameStartedScreen}
-        : {GameNotStartedScreen}
+        ? <GameStartedScreen />
+        : <GameNotStartedScreen />
       }
     </Container>
   );
