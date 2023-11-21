@@ -212,14 +212,29 @@ interface InteractableCommandBase {
 
 export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<PictionaryMove> | LeaveGameCommand | StartGameCommand | WhiteboardCommand;
 
-export type WhiteboardCommand = WhiteboardJoin | WhiteboardLeave
+export type WhiteboardCommand = WhiteboardJoin | WhiteboardLeave | WhiteboardChange | WhiteboardPointerChange | WhiteboardDrawerChange
 
 export type WhiteboardJoin = {
-  type: 'WhiteboardJoin'
+  type: 'WhiteboardJoin';
 }
 
 export type WhiteboardLeave = {
-  type: 'WhiteboardLeave'
+  type: 'WhiteboardLeave';
+}
+
+export type WhiteboardChange = {
+  type: 'WhiteboardChange';
+  elements: unknown;
+}
+
+export type WhiteboardPointerChange = {
+  type: 'WhiteboardPointerChange';
+  payload: unknown;
+}
+
+export type WhiteboardDrawerChange = {
+  type: 'WhiteboardDrawerChange';
+  newDrawerId: string;
 }
 
 export interface ViewingAreaUpdateCommand  {
@@ -269,7 +284,7 @@ export interface ServerToClientEvents {
   whiteboardReponse: (response: WhiteboardServerResponse) => void;
 }
 
-export type WhiteboardServerResponse = WhiteboardPlayerJoin | Whiteboard;
+export type WhiteboardServerResponse = WhiteboardPlayerJoin | WhiteboardPlayerLeave | WhiteboardNewScene| WhiteboardPointerUpdate | WhiteboardNewDrawer;
 
 export type WhiteboardPlayer = {
   id: string;
@@ -281,8 +296,9 @@ export type WhiteboardPlayerJoin = {
   type: "WhiteboardPlayerJoin";
   player: WhiteboardPlayer;
   isDrawer: boolean;
-  drawer: WhiteboardPlayer;
-  viewer: WhiteboardPlayer[];
+  drawer: WhiteboardPlayer | undefined;
+  viewers: WhiteboardPlayer[];
+  elements: unknown;
 }
 
 export type WhiteboardPlayerLeave = {
@@ -290,10 +306,29 @@ export type WhiteboardPlayerLeave = {
   type: "WhiteboardPlayerLeave";
   player: WhiteboardPlayer;
   isDrawer: boolean;
-  drawer: WhiteboardPlayer;
-  viewer: WhiteboardPlayer[];
+  drawer: WhiteboardPlayer | undefined;
+  viewers: WhiteboardPlayer[];
 }
 
+export type WhiteboardNewScene = {
+  id: string;
+  type: "WhiteboardNewScene";
+  elements: unknown;
+}
+
+export type WhiteboardPointerUpdate = {
+  id: string;
+  type: "WhiteboardPointerUpdate";
+  player: WhiteboardPlayer;
+  payload: unknown;
+}
+
+export type WhiteboardNewDrawer = {
+  id: string;
+  type: "WhiteboardNewDrawer";
+  drawer: WhiteboardPlayer | undefined;
+  viewers: WhiteboardPlayer[];
+}
 
 export interface ClientToServerEvents {
   chatMessage: (message: ChatMessage) => void;

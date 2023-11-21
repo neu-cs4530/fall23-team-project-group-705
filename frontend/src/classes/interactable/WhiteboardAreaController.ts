@@ -1,3 +1,5 @@
+import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
+import { Payload } from '../../components/Town/interactables/Whiteboard/Whiteboard';
 import {
   WhiteboardArea as WhiteboardAreaModel,
   WhiteboardPlayer,
@@ -38,8 +40,22 @@ export default class WhiteboardAreaController extends InteractableAreaController
     this._townController = townController;
   }
 
+  public get drawer() {
+    return this._model.drawer;
+  }
+
+  public get viewers() {
+    return this._model.viewers;
+  }
+
   public isActive(): boolean {
     return this.occupants.length > 0;
+  }
+
+  public isDrawer(): boolean {
+    return this._model.drawer === undefined
+      ? true
+      : this._model.drawer.id === this._townController.ourPlayer.id;
   }
 
   protected _updateFrom(newModel: WhiteboardAreaModel): void {
@@ -48,8 +64,15 @@ export default class WhiteboardAreaController extends InteractableAreaController
 
   public handleServerResponse(response: WhiteboardServerResponse) {
     if (response.type === 'WhiteboardPlayerJoin') {
-      this._handlePlayerJoin(response.player, response.isDrawer, response.drawer, response.viewers);
+      this._handlePlayerJoin(
+        response.player,
+        response.isDrawer,
+        response.drawer,
+        response.viewers,
+        response.elements,
+      );
     }
+
     if (response.type === 'WhiteboardPlayerLeave') {
       this._handlePlayerLeave(
         response.player,
@@ -58,16 +81,53 @@ export default class WhiteboardAreaController extends InteractableAreaController
         response.viewers,
       );
     }
+
+    if (response.type === 'WhiteboardNewScene') {
+      this._handleDrawerChange(response.elements);
+    }
+
+    if (response.type === 'WhiteboardPointerUpdate') {
+      this._handlePointerUpdate(response.player, response.payload);
+    }
+
+    if (response.type === 'WhiteboardNewDrawer') {
+      this._handleNewDrawer(response.drawer, response.viewers);
+    }
+  }
+
+  private _handlePointerUpdate(player: WhiteboardPlayer, payload: unknown) {
+    if (this._townController.ourPlayer.id !== player.id) {
+      this.emit('whiteboardPointerUpdate', {
+        player,
+        payload,
+      });
+    }
+  }
+
+  private _handleDrawerChange(elements: unknown) {
+    if (!this.isDrawer()) {
+      this.emit('whiteboardNewScene', {
+        elements,
+      });
+    }
   }
 
   private _handlePlayerJoin(
     player: WhiteboardPlayer,
     isDrawer: boolean,
-    drawer: WhiteboardPlayer,
+    drawer: WhiteboardPlayer | undefined,
     viewers: WhiteboardPlayer[],
+    elements: unknown,
   ) {
     this._model.drawer = drawer;
     this._model.viewers = viewers;
+
+    if (this._townController.ourPlayer.id === player.id) {
+      this.emit('whiteboardNewScene', {
+        elements,
+      });
+    }
+
     this.emit('whiteboardPlayerJoin', {
       player,
       isDrawer,
@@ -77,7 +137,7 @@ export default class WhiteboardAreaController extends InteractableAreaController
   private _handlePlayerLeave(
     player: WhiteboardPlayer,
     isDrawer: boolean,
-    drawer: WhiteboardPlayer,
+    drawer: WhiteboardPlayer | undefined,
     viewers: WhiteboardPlayer[],
   ) {
     this._model.drawer = drawer;
@@ -91,6 +151,14 @@ export default class WhiteboardAreaController extends InteractableAreaController
 
     this.emit('whiteboardPlayerLeave', {
       player: player,
+    });
+  }
+
+  private _handleNewDrawer(drawer: WhiteboardPlayer | undefined, viewers: WhiteboardPlayer[]) {
+    this._model.drawer = drawer;
+    this._model.viewers = viewers;
+    this.emit('whiteboardNewDrawer', {
+      player: drawer,
     });
   }
 
@@ -124,6 +192,29 @@ export default class WhiteboardAreaController extends InteractableAreaController
   public async joinArea() {
     await this._townController.sendInteractableCommand(this.id, {
       type: 'WhiteboardJoin',
+    });
+  }
+
+  public async boardChange(elements: Readonly<ExcalidrawElement[]>) {
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'WhiteboardChange',
+      elements,
+    });
+  }
+
+  public async pointerChange(payload: Payload) {
+    if (payload.pointersMap.size < 2) {
+      await this._townController.sendInteractableCommand(this.id, {
+        type: 'WhiteboardPointerChange',
+        payload,
+      });
+    }
+  }
+
+  public async drawerChange(newDrawerId: string) {
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'WhiteboardDrawerChange',
+      newDrawerId,
     });
   }
 }

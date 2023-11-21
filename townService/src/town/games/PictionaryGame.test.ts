@@ -3,6 +3,11 @@ import PICTIONARY_WORDLIST from './PictionaryWordlist';
 import { createPlayerForTesting } from '../../TestUtils';
 import Player from '../../lib/Player';
 import { GameMove, PictionaryMove, PlayerID } from '../../types/CoveyTownSocket';
+import {
+  GAME_STARTED_MESSAGE,
+  PLAYER_ALREADY_IN_GAME_MESSAGE,
+  PLAYER_NOT_IN_GAME_MESSAGE,
+} from '../../lib/InvalidParametersError';
 
 describe('PictionaryGame', () => {
   let game: PictionaryGame;
@@ -30,6 +35,7 @@ describe('PictionaryGame', () => {
     let player1: Player;
     let player2: Player;
     let player3: Player;
+    let player4: Player;
     const makeCorrectGuess: (playerID: PlayerID) => GameMove<PictionaryMove> = (
       playerID: PlayerID,
     ) => ({
@@ -56,6 +62,7 @@ describe('PictionaryGame', () => {
       player1 = createPlayerForTesting();
       player2 = createPlayerForTesting();
       player3 = createPlayerForTesting();
+      player4 = createPlayerForTesting();
     });
     describe('once the game has started', () => {
       beforeEach(() => {
@@ -63,6 +70,33 @@ describe('PictionaryGame', () => {
         game.join(player2);
         game.join(player3);
         game.startGame();
+      });
+      it('should assign the drawer', () => {
+        expect(game.state.drawer).toEqual(player1.id);
+      });
+      it('should throw error when game is started', () => {
+        game.state.status = 'IN_PROGRESS';
+        expect(() => game.join(player4)).toThrowError(GAME_STARTED_MESSAGE);
+      });
+      it('should throw error when the a player join twice', () => {
+        expect(() => game.join(player2)).toThrowError(PLAYER_ALREADY_IN_GAME_MESSAGE);
+      });
+      it('should throw error when the leave() enter a new player', () => {
+        expect(() => game.leave(player4)).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
+      });
+      it('should end the game when there is no player', () => {
+        game.leave(player1);
+        game.leave(player2);
+        game.leave(player3);
+        expect(game.state.status).toEqual('OVER');
+      });
+      it('should change the drawer when drawer leaves', () => {
+        game.leave(player1);
+        expect(game.state.drawer).toEqual(player2.id);
+      });
+      it('should change the drawer when turn changes', () => {
+        game.nextTurn();
+        expect(game.state.drawer).toEqual(player2.id);
       });
       it('should do nothing on an incorrect guess', () => {
         const priorState = {
