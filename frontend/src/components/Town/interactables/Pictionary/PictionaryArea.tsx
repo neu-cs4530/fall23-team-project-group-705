@@ -7,7 +7,9 @@ import {
   Box,
   Button,
   Container,
+  Flex,
   Heading,
+  HStack,
   Input,
   List,
   ListItem,
@@ -18,7 +20,10 @@ import {
   ModalOverlay,
   UnorderedList,
   useToast,
+  VStack,
 } from '@chakra-ui/react';
+import { Excalidraw } from '@excalidraw/excalidraw';
+import { ExcalidrawContainerContext } from '@excalidraw/excalidraw/types/components/App';
 import React, { useCallback, useEffect, useState } from 'react';
 import PictionaryAreaController from '../../../../classes/interactable/PictionaryAreaController';
 import PlayerController from '../../../../classes/PlayerController';
@@ -28,7 +33,6 @@ import {
   GameResult,
   GameStatus,
   InteractableID,
-  PictionaryGameState,
   PlayerID,
 } from '../../../../types/CoveyTownSocket';
 import GameAreaInteractable from '../GameArea';
@@ -79,6 +83,10 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   const [betweenTurns, setBetweenTurns] = useState(gameAreaController.betweenTurns);
   const [guess, setGuess] = useState('');
   const toast = useToast();
+
+  // TODO: Put these in a single point of control
+  const turnLength = 30;
+  const intermissionLength = 5;
 
   useEffect(() => {
     const updateGameState = () => {
@@ -180,11 +188,59 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     );
   }
 
-  //to use it:  {EndGameScore(gameAreaController.scores)};
-  const EndGameScore = (scores: Record<PlayerID, number> | undefined) => {
+  function GuessInputs(): JSX.Element {
     return (
-      <div>
-        <h1>End Game Scores</h1>
+      <Flex direction={'column'}>
+          <Input
+            placeholder='Type your guess here'
+            value={guess}
+            onChange={event => setGuess(event.target.value)}
+          />
+          <Button
+            onClick={async () => {
+              try {
+                await gameAreaController.makeGuess(guess).then(() => {
+                  setGuess('');
+                  if (gameAreaController.weAlreadyGuessedCorrectly) {
+                    toast({
+                      title: 'Correct!',
+                      status: 'success',
+                    });
+                  } else {
+                    toast({
+                      title: 'Incorrect.',
+                      status: 'error',
+                    });
+                  }
+                });
+              } catch (e) {
+                toast({
+                  title: 'Error making guess',
+                  description: (e as Error).toString(),
+                  status: 'error',
+                });
+              }
+            }}>
+            Guess
+          </Button>
+      </Flex>
+    );
+  }
+
+  function CurrentWordDisplay(): JSX.Element {
+    return (
+      <Container>
+        <Heading as='h4' size='md'>{betweenTurns ? 'The word was:' : 'Your word:'}</Heading>
+        {currentWord}
+      </Container>
+    );
+  }
+
+  //to use it:  {EndGameScore(gameAreaController.scores)};
+  function EndGameScore({ scores }: { scores: Record<PlayerID, number> | undefined}): JSX.Element {
+    return (
+      <Container>
+        <Heading as='h4' size='md'>Scores:</Heading>
         {scores ? (
           <UnorderedList>
             {(Object.entries(scores) as [PlayerID, number][]).map(([playerID, score]) => (
@@ -194,9 +250,21 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
         ) : (
           <p>No scores available</p>
         )}
-      </div>
+      </Container>
     );
   };
+
+  function TimerDisplay(): JSX.Element {
+    return (
+      <div>
+        {
+          betweenTurns
+          ? `Next turn in ${intermissionLength - timer} seconds`
+          : `${turnLength - timer} seconds remaining`
+        }
+      </div>
+    );
+  }
 
   // Dispalys all info needed for testing pictionary game
   function TestingInfo(): JSX.Element {
@@ -258,7 +326,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
             BetweenTurns?: {betweenTurns ? 'true' : 'false'}, Timer: {timer}
           </ListItem>
         </ListItem>
-        <ListItem>{EndGameScore(gameAreaController.scores)}</ListItem>
+        <ListItem><EndGameScore scores={gameAreaController.scores} /></ListItem>
       </UnorderedList>
     )
   }
@@ -299,14 +367,31 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     </div>
   )};
 
+  function PictionarySidebar(): JSX.Element {
+    return (
+      <VStack width={250} spacing='12' paddingTop={4}>
+        {
+          gameAreaController.isOurTurn || betweenTurns
+          ? <CurrentWordDisplay />
+          : <GuessInputs />
+        }
+        <EndGameScore scores={gameAreaController.scores}/>
+      </VStack>
+    );
+  }
+
+  const excalidraw = <Excalidraw />;
   function GameStartedScreen(): JSX.Element {
     return (
-      <h1>Game Screen</h1>
+      <HStack h={'2xl'} w={['sm', '2xl', '6xl']} alignItems='top' margin={2}>
+        {excalidraw}
+        <PictionarySidebar />
+      </HStack>
     );
   };
 
   return (
-    <Container>
+    <Container maxW={'fit-content'} maxH={'fit-content'}>
       {
         gameStatus === 'IN_PROGRESS'
         ? <GameStartedScreen />
@@ -337,7 +422,7 @@ export default function PictionaryAreaWrapper(): JSX.Element {
     return (
       <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false}>
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent maxW={'fit-content'} maxH={'fit-content'} marginTop={10}>
           <ModalHeader>{gameArea.name}</ModalHeader>
           <ModalCloseButton />
           <PictionaryArea interactableID={gameArea.name} />;
