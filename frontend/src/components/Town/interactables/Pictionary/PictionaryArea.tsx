@@ -23,7 +23,6 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { Excalidraw } from '@excalidraw/excalidraw';
-import { ExcalidrawContainerContext } from '@excalidraw/excalidraw/types/components/App';
 import React, { useCallback, useEffect, useState } from 'react';
 import PictionaryAreaController from '../../../../classes/interactable/PictionaryAreaController';
 import PlayerController from '../../../../classes/PlayerController';
@@ -36,7 +35,7 @@ import {
   PlayerID,
 } from '../../../../types/CoveyTownSocket';
 import GameAreaInteractable from '../GameArea';
-import TimerDisplay from './TimerDisplay';
+import EndGameScore from './EndGameScore';
 
 /**
  * The PictionaryArea component renders the Pictionary game area.
@@ -73,6 +72,13 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     useInteractableAreaController<PictionaryAreaController>(interactableID);
   const townController = useTownController();
 
+  //TODO: Give these a single point of control for all classes
+  // The length, in seconds. of one drawer's turn.
+  const turnLength = 30;
+
+  // The length, in seconds, between turns.
+  const intermissionLength = 5;
+
   const [history, setHistory] = useState<GameResult[]>(gameAreaController.history);
   const [isPlayer, setIsPlayer] = useState<boolean>(gameAreaController.isPlayer);
   const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
@@ -81,6 +87,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   const [drawer, setDrawer] = useState<PlayerController | undefined>(gameAreaController.drawer);
   const [currentWord, setCurrentWord] = useState<string>(gameAreaController.currentWord);
   const [betweenTurns, setBetweenTurns] = useState(gameAreaController.betweenTurns);
+  const [timer, setTimer] = useState(gameAreaController.timer);
   const [guess, setGuess] = useState('');
   const toast = useToast();
 
@@ -92,6 +99,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       setObservers(gameAreaController.observers);
       setDrawer(gameAreaController.drawer);
       setCurrentWord(gameAreaController.currentWord);
+      setTimer(gameAreaController.timer);
       setBetweenTurns(gameAreaController.betweenTurns);
       console.log(`game state update, isPlayer: ${gameAreaController.isPlayer}`);
     };
@@ -131,6 +139,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       gameAreaController.drawer,
       gameAreaController.currentWord,
       gameAreaController.betweenTurns,
+      gameAreaController.timer,
       toast]);
 
   // useEffect(() => {
@@ -195,73 +204,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     );
   }
 
-  function GuessInputs(): JSX.Element {
-    return (
-      <Flex direction={'column'}>
-          <Input
-            placeholder='Type your guess here'
-            value={guess}
-            onChange={event => setGuess(event.target.value)}
-            key='guessInput'
-          />
-          <Button
-            onClick={async () => {
-              try {
-                await gameAreaController.makeGuess(guess).then(() => {
-                  setGuess('');
-                  if (gameAreaController.weAlreadyGuessedCorrectly) {
-                    toast({
-                      title: 'Correct!',
-                      status: 'success',
-                    });
-                  } else {
-                    toast({
-                      title: 'Incorrect.',
-                      status: 'error',
-                    });
-                  }
-                });
-              } catch (e) {
-                toast({
-                  title: 'Error making guess',
-                  description: (e as Error).toString(),
-                  status: 'error',
-                });
-              }
-            }}>
-            Guess
-          </Button>
-      </Flex>
-    );
-  }
-
-  function CurrentWordDisplay(): JSX.Element {
-    return (
-      <Container>
-        <Heading as='h4' size='md'>{betweenTurns ? 'The word was:' : 'Your word:'}</Heading>
-        {currentWord}
-      </Container>
-    );
-  }
-
-  //to use it:  {EndGameScore(gameAreaController.scores)};
-  function EndGameScore({ scores }: { scores: Record<PlayerID, number> | undefined}): JSX.Element {
-    return (
-      <Container>
-        <Heading as='h4' size='md'>Scores:</Heading>
-        {scores ? (
-          <UnorderedList>
-            {(Object.entries(scores) as [PlayerID, number][]).map(([playerID, score]) => (
-              <ListItem key={playerID}>{`Player ${playerID}: ${score}`}</ListItem>
-            ))}
-          </UnorderedList>
-        ) : (
-          <p>No scores available</p>
-        )}
-      </Container>
-    );
-  };
-
   // Dispalys all info needed for testing pictionary game
   function TestingInfo(): JSX.Element {
     return (
@@ -322,66 +264,63 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
             {/* BetweenTurns?: {betweenTurns ? 'true' : 'false'}, Timer: {timer} */}
           </ListItem>
         </ListItem>
-        <ListItem><EndGameScore scores={gameAreaController.scores} /></ListItem>
       </UnorderedList>
     )
-  }
-
-  function GameNotStartedScreen(): JSX.Element {
-    return (
-    <div>
-      <Accordion allowToggle>
-        <AccordionItem>
-          <Heading as='h3'>
-            <AccordionButton>
-              <Box as='span' flex='1' textAlign='left'>
-                Leaderboard
-                <AccordionIcon />
-              </Box>
-            </AccordionButton>
-          </Heading>
-        </AccordionItem>
-        <AccordionItem>
-          <Heading as='h3'>
-            <AccordionButton>
-              <Box as='span' flex='1' textAlign='left'>
-                Current Observers
-                <AccordionIcon />
-              </Box>
-            </AccordionButton>
-          </Heading>
-          <AccordionPanel>
-            <List aria-label='list of observers in the game'>
-              {observers.map(player => {
-                return <ListItem key={player.id}>{player.userName}</ListItem>;
-              })}
-            </List>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
-      {gameStatusText}
-    </div>
-  )};
-
-  function PictionarySidebar(): JSX.Element {
-    return (
-      <VStack width={250} spacing='12' paddingTop={4}>
-        <TimerDisplay gameAreaController={gameAreaController} />
-        {
-          gameAreaController.isOurTurn || betweenTurns
-          ? <CurrentWordDisplay />
-          : <GuessInputs />
-        }
-        <EndGameScore scores={gameAreaController.scores}/>
-      </VStack>
-    );
   }
 
   function GameStartedScreen(): JSX.Element {
     return (
       <HStack h={'2xl'} w={['sm', '2xl', '6xl']} alignItems='top' margin={2}>
         <Excalidraw />
-        <PictionarySidebar />
+        <VStack width={250} spacing='12' paddingTop={4}>
+        {
+          gameAreaController.isOurTurn || betweenTurns
+          ? 
+          <>
+            <Heading as='h4' size='md' textAlign='left'>{betweenTurns ? 'The word was:' : 'Your word:'}</Heading>
+            {currentWord}
+          </>
+          : 
+          <>
+            <Flex direction={'column'}>
+              <Input
+                placeholder='Type your guess here'
+                value={guess}
+                onChange={event => setGuess(event.target.value)}
+                key='guessInput'
+              />
+              <Button
+                onClick={async () => {
+                  try {
+                    await gameAreaController.makeGuess(guess).then(() => {
+                      setGuess('');
+                      if (gameAreaController.weAlreadyGuessedCorrectly) {
+                        toast({
+                          title: 'Correct!',
+                          status: 'success',
+                        });
+                      } else {
+                        toast({
+                          title: 'Incorrect.',
+                          status: 'error',
+                        });
+                      }
+                    });
+                  } catch (e) {
+                    toast({
+                      title: 'Error making guess',
+                      description: (e as Error).toString(),
+                      status: 'error',
+                    });
+                  }
+                }}>
+                Guess
+              </Button>
+            </Flex>
+          </>
+        }
+        <EndGameScore scores={gameAreaController.scores}/>
+      </VStack>
       </HStack>
     );
   };
@@ -390,8 +329,99 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     <Container maxW={'fit-content'} maxH={'fit-content'}>
       {
         gameStatus === 'IN_PROGRESS'
-        ? <GameStartedScreen />
-        : <GameNotStartedScreen />
+        ? <HStack h={'2xl'} w={['sm', '2xl', '6xl']} alignItems='top' margin={2}>
+        <Excalidraw />
+        <VStack width={250} spacing='12' paddingTop={4}>
+        <div>
+          <Heading as='h4' size='md'>
+            {
+              betweenTurns
+              ? `${intermissionLength - timer} seconds until next turn.`
+              : `${turnLength - timer} seconds left to ${gameAreaController.isOurTurn ? 'draw' : 'guess'}.`
+            }
+          </Heading>
+        </div>
+        {
+          gameAreaController.isOurTurn || betweenTurns
+          ? 
+          <>
+            <Heading as='h4' size='md'>{betweenTurns ? 'The word was:' : 'Your word:'}</Heading>
+            {currentWord}
+          </>
+          : 
+          <>
+            <Flex direction={'column'}>
+              <Input
+                placeholder='Type your guess here'
+                value={guess}
+                onChange={event => setGuess(event.target.value)}
+                key='guessInput'
+              />
+              <Button
+                onClick={async () => {
+                  try {
+                    await gameAreaController.makeGuess(guess).then(() => {
+                      setGuess('');
+                      if (gameAreaController.weAlreadyGuessedCorrectly) {
+                        toast({
+                          title: 'Correct!',
+                          status: 'success',
+                        });
+                      } else {
+                        toast({
+                          title: 'Incorrect.',
+                          status: 'error',
+                        });
+                      }
+                    });
+                  } catch (e) {
+                    toast({
+                      title: 'Error making guess',
+                      description: (e as Error).toString(),
+                      status: 'error',
+                    });
+                  }
+                }}>
+                Guess
+              </Button>
+            </Flex>
+          </>
+        }
+        <EndGameScore scores={gameAreaController.scores}/>
+      </VStack>
+      </HStack>
+        : <div>
+        <Accordion allowToggle>
+          <AccordionItem>
+            <Heading as='h3'>
+              <AccordionButton>
+                <Box as='span' flex='1' textAlign='left'>
+                  Leaderboard
+                  <AccordionIcon />
+                </Box>
+              </AccordionButton>
+            </Heading>
+          </AccordionItem>
+          <AccordionItem>
+            <Heading as='h3'>
+              <AccordionButton>
+                <Box as='span' flex='1' textAlign='left'>
+                  Current Observers
+                  <AccordionIcon />
+                </Box>
+              </AccordionButton>
+            </Heading>
+            <AccordionPanel>
+              <List aria-label='list of observers in the game'>
+                {observers.map(player => {
+                  return <ListItem key={player.id}>{player.userName}</ListItem>;
+                })}
+              </List>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+        {gameStatusText}
+      </div>
       }
     </Container>
   );
