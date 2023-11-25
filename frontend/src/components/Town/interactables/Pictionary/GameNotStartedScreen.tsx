@@ -1,7 +1,9 @@
 import { Accordion, AccordionItem, AccordionButton, AccordionIcon, AccordionPanel, Heading, Box, List, ListItem } from "@chakra-ui/react";
 import PlayerController from "../../../../classes/PlayerController";
 
-function GameNotStartedScreen({gameStatusText}: {gameStatusText: JSX.Element}, {observers}: {observers: PlayerController[]}): JSX.Element {
+function GameNotStartedScreen(props: {gameStatusText: JSX.Element, observers: PlayerController[]}): JSX.Element {
+    const gameStatusText: JSX.Element = props.gameStatusText;
+    const observers: PlayerController[] = props.observers;
     return (
     <div>
       <Accordion allowToggle>
