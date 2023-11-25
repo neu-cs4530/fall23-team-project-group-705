@@ -1,10 +1,24 @@
-import { Accordion, AccordionItem, AccordionButton, AccordionIcon, AccordionPanel, Heading, Box, List, ListItem } from "@chakra-ui/react";
-import PlayerController from "../../../../classes/PlayerController";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionIcon,
+  AccordionPanel,
+  Heading,
+  Box,
+  List,
+  ListItem,
+} from '@chakra-ui/react';
+import PlayerController from '../../../../classes/PlayerController';
+import React from 'react';
 
-function GameNotStartedScreen(props: {gameStatusText: JSX.Element, observers: PlayerController[]}): JSX.Element {
-    const gameStatusText: JSX.Element = props.gameStatusText;
-    const observers: PlayerController[] = props.observers;
-    return (
+function GameNotStartedScreen(props: {
+  gameStatusText: JSX.Element;
+  observers: PlayerController[];
+}): JSX.Element {
+  const gameStatusText: JSX.Element = props.gameStatusText;
+  const observers: PlayerController[] = props.observers;
+  return (
     <div>
       <Accordion allowToggle>
         <AccordionItem>
@@ -37,5 +51,6 @@ function GameNotStartedScreen(props: {gameStatusText: JSX.Element, observers: Pl
       </Accordion>
       {gameStatusText}
     </div>
-  )}
-  export default GameNotStartedScreen;
+  );
+}
+export default GameNotStartedScreen;

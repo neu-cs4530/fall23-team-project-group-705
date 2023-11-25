@@ -73,7 +73,11 @@ export default class PictionaryAreaController extends GameAreaController<
   }
 
   get weAlreadyGuessedCorrectly(): boolean {
-    return this._model.game?.state.alreadyGuessedCorrectly?.includes(this._townController.ourPlayer.id) ? true : false;
+    return this._model.game?.state.alreadyGuessedCorrectly?.includes(
+      this._townController.ourPlayer.id,
+    )
+      ? true
+      : false;
   }
 
   /**

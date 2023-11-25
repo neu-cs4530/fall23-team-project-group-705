@@ -1,41 +1,20 @@
 import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Box,
   Button,
   Container,
-  Flex,
-  Heading,
-  HStack,
-  Input,
-  List,
-  ListItem,
   Modal,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  UnorderedList,
   useToast,
-  VStack,
 } from '@chakra-ui/react';
-import { Excalidraw } from '@excalidraw/excalidraw';
 import React, { useCallback, useEffect, useState } from 'react';
 import PictionaryAreaController from '../../../../classes/interactable/PictionaryAreaController';
 import PlayerController from '../../../../classes/PlayerController';
 import { useInteractable, useInteractableAreaController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
-import {
-  GameResult,
-  GameStatus,
-  InteractableID,
-  PlayerID,
-} from '../../../../types/CoveyTownSocket';
+import { GameResult, GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
 import GameAreaInteractable from '../GameArea';
-import EndGameScore from './EndGameScore';
 import GameNotStartedScreen from './GameNotStartedScreen';
 import GameStartedScreen from './GameStartedScreen';
 
@@ -118,20 +97,18 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       gameAreaController.removeListener('gameEnd', onGameEnd);
       gameAreaController.removeListener('gameUpdated', updateGameState);
     };
-  }, [townController, 
-      gameAreaController.history,
-      gameAreaController.isPlayer,
-      gameAreaController.status,
-      gameAreaController.observers,
-      gameAreaController.drawer,
-      gameAreaController.currentWord,
-      gameAreaController.betweenTurns,
-      gameAreaController.timer,
-      toast]);
-
-  // useEffect(() => {
-  //   setTimer(gameAreaController.timer);
-  // }, [gameAreaController.timer])
+  }, [
+    townController,
+    gameAreaController.history,
+    gameAreaController.isPlayer,
+    gameAreaController.status,
+    gameAreaController.observers,
+    gameAreaController.drawer,
+    gameAreaController.currentWord,
+    gameAreaController.betweenTurns,
+    gameAreaController.timer,
+    toast,
+  ]);
 
   let gameStatusText = <></>;
   if (gameStatus === 'IN_PROGRESS') {
@@ -168,21 +145,23 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
         </Button>
       );
     } else if (gameAreaController.status === 'WAITING_TO_START' && isPlayer) {
-      gameButton = <Button
-        disabled={gameAreaController.players.length < 2}
-        onClick={async () => {
-          try {
-            await gameAreaController.startGame();
-          } catch (e) {
-            toast({
-              title: 'Error starting game',
-              description: (e as Error).toString(),
-              status: 'error',
-            });
-          }
-        }}>
-        Start
-      </Button>
+      gameButton = (
+        <Button
+          disabled={gameAreaController.players.length < 2}
+          onClick={async () => {
+            try {
+              await gameAreaController.startGame();
+            } catch (e) {
+              toast({
+                title: 'Error starting game',
+                description: (e as Error).toString(),
+                status: 'error',
+              });
+            }
+          }}>
+          Start
+        </Button>
+      );
     }
     gameStatusText = (
       <b>
@@ -193,11 +172,11 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
 
   return (
     <Container maxW={'fit-content'} maxH={'fit-content'}>
-      {
-        gameStatus === 'IN_PROGRESS'
-        ? <GameStartedScreen gameAreaController={gameAreaController} />
-        : <GameNotStartedScreen gameStatusText={gameStatusText} observers={observers} />
-      }
+      {gameStatus === 'IN_PROGRESS' ? (
+        <GameStartedScreen gameAreaController={gameAreaController} />
+      ) : (
+        <GameNotStartedScreen gameStatusText={gameStatusText} observers={observers} />
+      )}
     </Container>
   );
 }

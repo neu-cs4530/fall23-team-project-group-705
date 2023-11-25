@@ -25,7 +25,7 @@ import PICTIONARY_WORDLIST from './PictionaryWordlist';
 export default class PictionaryGame extends Game<PictionaryGameState, PictionaryMove> {
   private _wordlist: string[];
 
-  //TODO: Give these a single point of control for all classes
+  // TODO: Give these a single point of control for all classes
   // The length, in seconds. of one drawer's turn.
   public static readonly turnLength = 30;
 
