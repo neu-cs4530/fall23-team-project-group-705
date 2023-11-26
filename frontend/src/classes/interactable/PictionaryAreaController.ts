@@ -72,6 +72,14 @@ export default class PictionaryAreaController extends GameAreaController<
     return this._model.game?.players.includes(this._townController.ourPlayer.id) || false;
   }
 
+  get weAlreadyGuessedCorrectly(): boolean {
+    return this._model.game?.state.alreadyGuessedCorrectly?.includes(
+      this._townController.ourPlayer.id,
+    )
+      ? true
+      : false;
+  }
+
   /**
    * Returns the status of the game.
    * Defaults to 'WAITING_TO_START' if the game is not in progress

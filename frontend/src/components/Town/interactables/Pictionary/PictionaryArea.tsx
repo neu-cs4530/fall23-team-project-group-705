@@ -1,22 +1,11 @@
 import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Box,
   Button,
   Container,
-  Heading,
-  Input,
-  List,
-  ListItem,
   Modal,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  UnorderedList,
   useToast,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -24,14 +13,10 @@ import PictionaryAreaController from '../../../../classes/interactable/Pictionar
 import PlayerController from '../../../../classes/PlayerController';
 import { useInteractable, useInteractableAreaController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
-import {
-  GameResult,
-  GameStatus,
-  InteractableID,
-  PictionaryGameState,
-  PlayerID,
-} from '../../../../types/CoveyTownSocket';
+import { GameResult, GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
 import GameAreaInteractable from '../GameArea';
+import GameNotStartedScreen from './GameNotStartedScreen';
+import GameStartedScreen from './GameStartedScreen';
 
 /**
  * The PictionaryArea component renders the Pictionary game area.
@@ -74,10 +59,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   const [observers, setObservers] = useState<PlayerController[]>(gameAreaController.observers);
   const [joiningGame, setJoiningGame] = useState(false);
   const [drawer, setDrawer] = useState<PlayerController | undefined>(gameAreaController.drawer);
-  const [currentWord, setCurrentWord] = useState<string>(gameAreaController.currentWord);
-  const [timer, setTimer] = useState(gameAreaController.timer);
-  const [betweenTurns, setBetweenTurns] = useState(gameAreaController.betweenTurns);
-  const [guess, setGuess] = useState('');
   const toast = useToast();
 
   useEffect(() => {
@@ -87,10 +68,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       setGameStatus(gameAreaController.status || 'WAITING_TO_START');
       setObservers(gameAreaController.observers);
       setDrawer(gameAreaController.drawer);
-      setCurrentWord(gameAreaController.currentWord);
-      setBetweenTurns(gameAreaController.betweenTurns);
-      setTimer(gameAreaController.timer);
-      console.log(`game state update, isPlayer: ${gameAreaController.isPlayer}`);
     };
     gameAreaController.addListener('gameUpdated', updateGameState);
     const onGameEnd = () => {
@@ -120,7 +97,18 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       gameAreaController.removeListener('gameEnd', onGameEnd);
       gameAreaController.removeListener('gameUpdated', updateGameState);
     };
-  }, [townController, gameAreaController, toast]);
+  }, [
+    townController,
+    gameAreaController.history,
+    gameAreaController.isPlayer,
+    gameAreaController.status,
+    gameAreaController.observers,
+    gameAreaController.drawer,
+    gameAreaController.currentWord,
+    gameAreaController.betweenTurns,
+    gameAreaController.timer,
+    toast,
+  ]);
 
   let gameStatusText = <></>;
   if (gameStatus === 'IN_PROGRESS') {
@@ -131,12 +119,12 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       </>
     );
   } else {
-    let joinGameButton = <></>;
+    let gameButton = <></>;
     if (
       (gameAreaController.status === 'WAITING_TO_START' && !isPlayer) ||
       gameAreaController.status === 'OVER'
     ) {
-      joinGameButton = (
+      gameButton = (
         <Button
           onClick={async () => {
             setJoiningGame(true);
@@ -156,117 +144,39 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
           Join New Game
         </Button>
       );
+    } else if (gameAreaController.status === 'WAITING_TO_START' && isPlayer) {
+      gameButton = (
+        <Button
+          disabled={gameAreaController.players.length < 2}
+          onClick={async () => {
+            try {
+              await gameAreaController.startGame();
+            } catch (e) {
+              toast({
+                title: 'Error starting game',
+                description: (e as Error).toString(),
+                status: 'error',
+              });
+            }
+          }}>
+          Start
+        </Button>
+      );
     }
     gameStatusText = (
       <b>
-        Game {gameStatus === 'WAITING_TO_START' ? 'not yet started' : 'over'}. {joinGameButton}
+        Game {gameStatus === 'WAITING_TO_START' ? 'not yet started' : 'over'}. {gameButton}
       </b>
     );
   }
 
-  //to use it:  {EndGameScore(gameAreaController.scores)};
-  const EndGameScore = (scores: Record<PlayerID, number> | undefined) => {
-    return (
-      <div>
-        <h1>End Game Scores</h1>
-        {scores ? (
-          <UnorderedList>
-            {(Object.entries(scores) as [PlayerID, number][]).map(([playerID, score]) => (
-              <ListItem key={playerID}>{`Player ${playerID}: ${score}`}</ListItem>
-            ))}
-          </UnorderedList>
-        ) : (
-          <p>No scores available</p>
-        )}
-      </div>
-    );
-  };
-
-  const guessButtonHandler = () => {
-    console.log(`guess button clicked with guess ${guess}`);
-  };
-
   return (
-    <Container>
-      {/* This list is for displaying testing/development info */}
-      <UnorderedList>
-        <ListItem>Current Word: {currentWord}</ListItem>
-        <ListItem>
-          Guess box:
-          <Input
-            placeholder='Type your guess here'
-            value={guess}
-            onChange={event => setGuess(event.target.value)}
-          />
-          <Button
-            onClick={async () => {
-              try {
-                await gameAreaController.makeGuess(guess).then(() => {
-                  setGuess('');
-                });
-              } catch (e) {
-                toast({
-                  title: 'Error making guess',
-                  description: (e as Error).toString(),
-                  status: 'error',
-                });
-              }
-            }}>
-            Guess
-          </Button>
-        </ListItem>
-        <ListItem>
-          Test start game:
-          <Button
-            onClick={async () => {
-              try {
-                await gameAreaController.startGame();
-              } catch (e) {
-                toast({
-                  title: 'Error starting game',
-                  description: (e as Error).toString(),
-                  status: 'error',
-                });
-              }
-            }}>
-            Start
-          </Button>
-          <ListItem>
-            BetweenTurns?: {betweenTurns ? 'true' : 'false'}, Timer: {timer}
-          </ListItem>
-        </ListItem>
-        <ListItem>{EndGameScore(gameAreaController.scores)}</ListItem>
-      </UnorderedList>
-      <Accordion allowToggle>
-        <AccordionItem>
-          <Heading as='h3'>
-            <AccordionButton>
-              <Box as='span' flex='1' textAlign='left'>
-                Leaderboard
-                <AccordionIcon />
-              </Box>
-            </AccordionButton>
-          </Heading>
-        </AccordionItem>
-        <AccordionItem>
-          <Heading as='h3'>
-            <AccordionButton>
-              <Box as='span' flex='1' textAlign='left'>
-                Current Observers
-                <AccordionIcon />
-              </Box>
-            </AccordionButton>
-          </Heading>
-          <AccordionPanel>
-            <List aria-label='list of observers in the game'>
-              {observers.map(player => {
-                return <ListItem key={player.id}>{player.userName}</ListItem>;
-              })}
-            </List>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
-      {gameStatusText}
+    <Container maxW={'fit-content'} maxH={'fit-content'}>
+      {gameStatus === 'IN_PROGRESS' ? (
+        <GameStartedScreen gameAreaController={gameAreaController} />
+      ) : (
+        <GameNotStartedScreen gameStatusText={gameStatusText} observers={observers} />
+      )}
     </Container>
   );
 }
@@ -292,7 +202,7 @@ export default function PictionaryAreaWrapper(): JSX.Element {
     return (
       <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false}>
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent maxW={'fit-content'} maxH={'fit-content'} marginTop={10}>
           <ModalHeader>{gameArea.name}</ModalHeader>
           <ModalCloseButton />
           <PictionaryArea interactableID={gameArea.name} />;

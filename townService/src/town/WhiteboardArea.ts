@@ -268,6 +268,7 @@ export default class WhiteboardArea extends InteractableArea {
     try {
       this._townEmitter.emit('whiteboardReponse', content);
     } catch (err) {
+      // TODO: Remove this
       console.error(err);
     }
   }
