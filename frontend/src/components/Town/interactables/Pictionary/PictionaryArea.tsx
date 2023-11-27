@@ -175,7 +175,11 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       {gameStatus === 'IN_PROGRESS' ? (
         <GameStartedScreen gameAreaController={gameAreaController} />
       ) : (
-        <GameNotStartedScreen gameStatusText={gameStatusText} observers={observers} />
+        <GameNotStartedScreen
+          gameStatusText={gameStatusText}
+          observers={observers}
+          gameAreaController={gameAreaController}
+        />
       )}
     </Container>
   );
