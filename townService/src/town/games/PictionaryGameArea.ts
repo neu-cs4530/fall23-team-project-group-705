@@ -17,6 +17,7 @@ import {
 } from '../../types/CoveyTownSocket';
 import GameArea from './GameArea';
 import PictionaryGame from './PictionaryGame';
+import WhiteboardArea from '../WhiteboardArea';
 
 /**
  * A PictionaryGameArea is a GameArea that hosts a PictionaryGame.
@@ -24,8 +25,11 @@ import PictionaryGame from './PictionaryGame';
  * @see GameArea
  */
 export default class PictionaryGameArea extends GameArea<PictionaryGame> {
-  public constructor(id: string, { x, y, width, height }: BoundingBox, townEmitter: TownEmitter) {
+  private whiteboardArea: WhiteboardArea;
+
+  public constructor(id: string, { x, y, width, height }: BoundingBox, townEmitter: TownEmitter, whiteboardArea: WhiteboardArea) {
     super(id, { x, y, width, height }, townEmitter);
+    this.whiteboardArea = whiteboardArea;
     setTimeout(() => {
       this._tick();
     }, 1000);
@@ -109,7 +113,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
       let game = this._game;
       if (!game || game.state.status === 'OVER') {
         // No game in progress, make a new one
-        game = new PictionaryGame();
+        game = new PictionaryGame(this.whiteboardArea);
         this._game = game;
       }
       game.join(player);

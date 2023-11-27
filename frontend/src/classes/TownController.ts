@@ -332,6 +332,13 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return ret as ViewingAreaController[];
   }
 
+  public get whiteboardAreas() {
+    const ret = this._interactableControllers.filter(
+      eachInteractable => eachInteractable instanceof WhiteboardAreaController,
+    );
+    return ret as WhiteboardAreaController[];
+  }
+
   public get gameAreas() {
     const ret = this._interactableControllers.filter(
       eachInteractable => eachInteractable instanceof GameAreaController,
@@ -633,6 +640,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
           } else if (isViewingArea(eachInteractable)) {
             this._interactableControllers.push(new ViewingAreaController(eachInteractable));
           } else if (isWhiteboardArea(eachInteractable)) {
+            console.log(`creating whiteboard area controller, ID: ${eachInteractable.id}`);
             this._interactableControllers.push(
               new WhiteboardAreaController(eachInteractable.id, eachInteractable, this),
             );
@@ -797,7 +805,7 @@ export function useTownSettings() {
  */
 export function useInteractableAreaController<T>(interactableAreaID: string): T {
   const townController = useTownController();
-  const interactableAreaController = townController.gameAreas.find(
+  const interactableAreaController = [...townController.gameAreas, ...townController.whiteboardAreas].find(
     eachArea => eachArea.id == interactableAreaID,
   );
   if (!interactableAreaController) {

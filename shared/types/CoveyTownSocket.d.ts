@@ -66,8 +66,7 @@ export interface WhiteboardArea extends Interactable {
 };
 
 export interface PictionaryArea extends Interactable {
-  // TODO: Add boardstate here
-  board?: any;
+  whiteboardModel: WhiteboardArea;
 };
 export interface BoundingBox {
   x: number;

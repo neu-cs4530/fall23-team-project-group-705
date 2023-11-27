@@ -401,9 +401,13 @@ export default class Town {
         ConversationArea.fromMapObject(eachConvAreaObj, this._broadcastEmitter),
       );
 
-    const gameAreas = objectLayer.objects
+    const gameAreas: InteractableArea[] = [];
+    objectLayer.objects
       .filter(eachObject => eachObject.type === 'GameArea')
-      .map(eachGameAreaObj => GameAreaFactory(eachGameAreaObj, this._broadcastEmitter));
+      .forEach((eachGameAreaObj) => {
+        const constructedGameAreas = GameAreaFactory(eachGameAreaObj, this._broadcastEmitter);
+        constructedGameAreas.forEach(constructedGameArea => gameAreas.push(constructedGameArea));
+      });
 
     const whiteboardAreas = objectLayer.objects
       .filter(eachObject => eachObject.type === 'WhiteboardArea')

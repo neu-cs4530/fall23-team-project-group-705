@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import PictionaryAreaController from '../../../../classes/interactable/PictionaryAreaController';
+import WhiteboardAreaController from '../../../../classes/interactable/WhiteboardAreaController';
 import PlayerController from '../../../../classes/PlayerController';
 import { useInteractable, useInteractableAreaController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
@@ -46,11 +47,13 @@ import GameStartedScreen from './GameStartedScreen';
  *    - Tie: description 'Game ended in a tie'
  *    - Our player won: description 'You won!'
  *    - Our player lost: description 'You lost :('
- *
+ *whiteboardArea
  */
 function PictionaryArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
   const gameAreaController =
     useInteractableAreaController<PictionaryAreaController>(interactableID);
+  const whiteboardAreaController =
+    useInteractableAreaController<WhiteboardAreaController>(`${interactableID}WhiteboardArea`);
   const townController = useTownController();
 
   const [history, setHistory] = useState<GameResult[]>(gameAreaController.history);
