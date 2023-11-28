@@ -54,7 +54,7 @@ export default class WhiteboardAreaController extends InteractableAreaController
 
   public isDrawer(): boolean {
     return this._model.drawer === undefined
-      ? true
+      ? false
       : this._model.drawer.id === this._townController.ourPlayer.id;
   }
 
@@ -91,8 +91,11 @@ export default class WhiteboardAreaController extends InteractableAreaController
     }
 
     if (response.type === 'WhiteboardNewDrawer') {
-      console.log('handling new drawer');
       this._handleNewDrawer(response.drawer, response.viewers);
+    }
+
+    if (response.type === 'WhiteboardClearDrawer') {
+      this._handleClearDrawer(response.viewers);
     }
   }
 
@@ -163,6 +166,12 @@ export default class WhiteboardAreaController extends InteractableAreaController
     });
   }
 
+  private _handleClearDrawer(viewers: WhiteboardPlayer[]) {
+    this._model.drawer = undefined;
+    this._model.viewers = viewers;
+    this.emit('whiteboardClearDrawer');
+  }
+
   /**
    * A whiteboard area is empty if there are no occupants in it, or the topic is undefined.
    */
@@ -221,12 +230,12 @@ export default class WhiteboardAreaController extends InteractableAreaController
 
   public async clearDrawer() {
     await this._townController.sendInteractableCommand(this.id, {
-      type: 'WhiteboardDrawerChange',
-      newDrawerId: undefined,
+      type: 'WhiteboardClearDrawerChange',
     });
   }
 
   public async eraseBoard() {
+    console.log("Whiteboard Controller, erase board");
     await this._townController.sendInteractableCommand(this.id, {
       type: 'WhiteboardErase',
     });

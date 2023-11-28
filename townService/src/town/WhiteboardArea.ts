@@ -121,8 +121,12 @@ export default class WhiteboardArea extends InteractableArea {
       this._handleWhiteboardDrawerChange(player, command.newDrawerId);
     }
 
+    if (command.type === 'WhiteboardClearDrawerChange') {
+      this._handleWhiteboardClearDrawerChange();
+    }
+
     if (command.type === 'WhiteboardErase') {
-      this._eraseWhiteboard();
+      this._handleWhiteboardErase();
     }
 
     
@@ -242,11 +246,16 @@ export default class WhiteboardArea extends InteractableArea {
     });
   }
 
-  private _handleWhiteboardDrawerChange(player: Player, newDrawerId: string | undefined) {
-    let newDrawer: Player | undefined;
-    if (newDrawerId !== undefined) {
-      const newDrawer = this._viewers.find(viewer => viewer.id === newDrawerId);
-      this._viewers = this._viewers.filter(viewer => viewer.id !== newDrawerId);
+  private _handleWhiteboardDrawerChange(player: Player, newDrawerId: string) {
+    if ((this._drawer && newDrawerId === this._drawer.id)) {
+      return;
+    }
+
+    const newDrawer = this._viewers.find(viewer => viewer.id === newDrawerId);
+    this._viewers = this._viewers.filter(viewer => viewer.id !== newDrawerId);
+
+    if (newDrawer === undefined) {
+      return;
     }
 
     if (this._drawer) {
@@ -268,6 +277,22 @@ export default class WhiteboardArea extends InteractableArea {
     });
   }
 
+  private _handleWhiteboardClearDrawerChange() {
+    if (this._drawer) {
+      this._viewers.push(this._drawer);
+    }
+    this._drawer = undefined;
+
+    this._emitWhiteboardEvent({
+      id: this.id,
+      type: 'WhiteboardClearDrawer',
+      viewers: this._viewers.map(viewer => ({
+        id: viewer.id,
+        userName: viewer.userName,
+      })),
+    });
+  }
+
   private _resetWhiteboardState() {
     if (!this.isActive) {
       this._elements = [];
@@ -275,7 +300,15 @@ export default class WhiteboardArea extends InteractableArea {
   }
 
   // For if we want to reset the whiteboard state while it is active
-  private _eraseWhiteboard() {
+  private _handleWhiteboardErase() {
+    const elements: unknown = [];
+    console.log("Whiteboard area, erase board");
+    this._townEmitter.emit('whiteboardReponse', {
+      id: this.id,
+      type: 'WhiteboardNewScene',
+      elements,
+    });
+
     this._elements = [];
   }
 

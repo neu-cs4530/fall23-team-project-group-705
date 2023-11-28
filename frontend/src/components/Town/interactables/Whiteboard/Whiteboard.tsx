@@ -127,6 +127,15 @@ export default function Whiteboard({ interactableId, isPictionaryWhiteboard }: {
       });
     };
 
+    const handleClearDrawer = () => {
+      setIsDrawerState(false);
+      setViewers(whiteboardController.viewers);
+      setCollaborators({
+        newDrawer: undefined,
+        newViewers: whiteboardController.viewers,
+      });
+    };
+
     const handleLeave = ({ player }: { player: WhiteboardPlayer }) => {
       whiteboardToast({
         title: `Player Leave`,
@@ -171,6 +180,7 @@ export default function Whiteboard({ interactableId, isPictionaryWhiteboard }: {
 
     whiteboardController.addListener('whiteboardPlayerJoin', handleJoin);
     whiteboardController.addListener('whiteboardNewDrawer', handleNewDrawer);
+    whiteboardController.addListener('whiteboardClearDrawer', handleClearDrawer);
     whiteboardController.addListener('whiteboardPlayerLeave', handleLeave);
     whiteboardController.addListener('whiteboardNewScene', handleNewScene);
     whiteboardController.addListener('whiteboardPointerUpdate', handlePointerUpdate);
@@ -178,6 +188,7 @@ export default function Whiteboard({ interactableId, isPictionaryWhiteboard }: {
     return () => {
       whiteboardController.removeListener('whiteboardPlayerJoin', handleJoin);
       whiteboardController.removeListener('whiteboardNewDrawer', handleNewDrawer);
+      whiteboardController.removeListener('whiteboardClearDrawer', handleClearDrawer);
       whiteboardController.removeListener('whiteboardPlayerLeave', handleLeave);
       whiteboardController.removeListener('whiteboardNewScene', handleNewScene);
       whiteboardController.removeListener('whiteboardPointerUpdate', handlePointerUpdate);

@@ -3,6 +3,8 @@ import PlayerController from '../PlayerController';
 import GameAreaController, { GameEventTypes } from './GameAreaController';
 import WhiteboardAreaController from './WhiteboardAreaController';
 import TownController, { useInteractableAreaController } from '../TownController';
+import { clear } from 'console';
+import { join } from 'path';
 
 
 export const PLAYER_NOT_IN_GAME_ERROR = 'Player is not in game';
@@ -121,39 +123,44 @@ export default class PictionaryAreaController extends GameAreaController<
     return this._model.game?.state.scores;
   }
 
+  private async _updateWhiteboard(joinGame: boolean, leaveGame: boolean, clearDrawer: boolean, newDrawer?: string): Promise<void> {
+    if (joinGame) {
+      await this._whiteboardAreaController.joinArea();
+    } else if (leaveGame) {
+      await this._whiteboardAreaController.leaveArea();
+    }
+    if (newDrawer || clearDrawer) {
+      await this._whiteboardAreaController.eraseBoard();
+      if (clearDrawer) {
+        await this._whiteboardAreaController.clearDrawer();
+      } else if (newDrawer) {
+        await this._whiteboardAreaController.drawerChange(newDrawer);
+      }
+    }
+  }
+
   /**
-   * Updates the internal state of this TicTacToeAreaController to match the new model.
+   * Updates the internal state of this PictionaryAreaConroller to match the new model.
    *
    * Calls super._updateFrom, which updates the occupants of this game area and
    * other common properties (including this._model).
-   *
-   * If the board has changed, emits a 'boardChanged' event with the new board. If the board has not changed,
-   *  does not emit the event.
-   *
-   * If the turn has changed, emits a 'turnChanged' event with true if it is our turn, and false otherwise.
-   * If the turn has not changed, does not emit the event.
    */
-  protected _updateFrom(newModel: GameArea<PictionaryGameState>): void {
+  protected _updateFrom(newModel: GameArea<PictionaryGameState>): void {    
+    const playerInCurrentModel = this._model.game !== undefined && this._model.game.players.includes(this._townController.ourPlayer.id);
+    const playerInNewModel = newModel.game !== undefined && newModel.game.players.includes(this._townController.ourPlayer.id);
+    const joinGame = !playerInCurrentModel && playerInNewModel;
+    const leaveGame = playerInCurrentModel && !playerInNewModel;
     const newDrawer = newModel.game?.state.drawer;
-    if (this._model.game?.state.drawer !== newDrawer) {
-      this._whiteboardAreaController.eraseBoard();
-      if(newDrawer) {
-        this._whiteboardAreaController.drawerChange(newDrawer);
-      } else {
-        this._whiteboardAreaController.clearDrawer();
-      }
+    const isNewDrawer = this._model.game?.state.drawer !== newDrawer;
+    const clearDrawer = isNewDrawer && (newDrawer === undefined);
+
+    if (isNewDrawer) {
+      this._updateWhiteboard(joinGame, leaveGame, clearDrawer, newDrawer);
+    } else {
+      this._updateWhiteboard(joinGame, leaveGame, clearDrawer);
     }
 
     super._updateFrom(newModel);
-  }
-
-  public async joinGame() {
-    await super.joinGame().then(async () => {
-      await this._whiteboardAreaController.joinArea().catch((reason) => {
-        this.leaveGame();
-        throw new Error(reason);
-      });
-    });
   }
 
   /**
