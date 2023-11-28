@@ -35,9 +35,11 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
   protected getType(): InteractableType {
     return 'PictionaryArea';
   }
+
   private _findPlayerName(id: PlayerID): string | undefined {
     return this._game?.findplayer(id);
   }
+
   private _scoresWithName(state: PictionaryGameState): { [playerName: string]: number } {
     const scoresWithName: { [playerName: string]: number } = {};
     if (state.scores) {
@@ -52,7 +54,8 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     }
     return scoresWithName;
   }
- private _stateUpdated(updatedState: GameInstance<PictionaryGameState>) {
+
+  private _stateUpdated(updatedState: GameInstance<PictionaryGameState>) {
     if (updatedState.state.status === 'OVER') {
       // If we haven't yet recorded the outcome, do so now.
       const gameID = this._game?.id;

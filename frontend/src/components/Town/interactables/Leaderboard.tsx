@@ -94,3 +94,59 @@ export default function Leaderboard({ results }: { results: GameResult[] }): JSX
     </Table>
   );
 }
+
+export function PictionaryLeaderboard({ results }: { results: GameResult[] }): JSX.Element {
+  const scoreByPlayer: Record<string, { player: string; score: number }> = {};
+  const playerNameList: string[] = [];
+  results.forEach(result => {
+    const playerNames = Object.keys(result.scores);
+    if (playerNameList === null || undefined) {
+      playerNames.forEach(playerName => {
+        const newPlayerData = {
+          player: playerName,
+          score: result.scores[playerName],
+        };
+        scoreByPlayer[playerName] = newPlayerData;
+      });
+    } else {
+      const matchingPlayerNames = playerNames.filter(name => playerNameList.includes(name));
+      matchingPlayerNames.forEach(playerName => {
+        const newPlayerData = {
+          player: playerName,
+          score: scoreByPlayer[playerName].score + result.scores[playerName],
+        };
+        scoreByPlayer[playerName] = newPlayerData;
+      });
+      const notMatchingPlayerNames = playerNames.filter(name => !playerNameList.includes(name));
+      notMatchingPlayerNames.forEach(playerName => {
+        const newPlayerData = {
+          player: playerName,
+          score: result.scores[playerName],
+        };
+        scoreByPlayer[playerName] = newPlayerData;
+      });
+    }
+  });
+  const rows = Object.keys(scoreByPlayer).map(player => scoreByPlayer[player]);
+  rows.sort((a, b) => b.score - a.score);
+  return (
+    <Table>
+      <Thead>
+        <Tr>
+          <th>Player</th>
+          <th>score</th>
+        </Tr>
+      </Thead>
+      <Tbody>
+        {rows.map(record => {
+          return (
+            <Tr key={record.player}>
+              <Td>{record.player}</Td>
+              <Td>{record.score}</Td>
+            </Tr>
+          );
+        })}
+      </Tbody>
+    </Table>
+  );
+}

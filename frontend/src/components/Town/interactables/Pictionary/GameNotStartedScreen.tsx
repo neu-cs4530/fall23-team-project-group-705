@@ -13,7 +13,7 @@ import PlayerController from '../../../../classes/PlayerController';
 import React, { useEffect, useState } from 'react';
 import PictionaryAreaController from '../../../../classes/interactable/PictionaryAreaController';
 import { GameResult } from '../../../../types/CoveyTownSocket';
-import Leaderboard from '../Leaderboard';
+import { PictionaryLeaderboard } from '../Leaderboard';
 function GameNotStartedScreen(props: {
   gameAreaController: PictionaryAreaController;
   gameStatusText: JSX.Element;
@@ -39,7 +39,7 @@ function GameNotStartedScreen(props: {
             </AccordionButton>
           </Heading>
           <AccordionPanel>
-            <Leaderboard results={history} />
+            <PictionaryLeaderboard results={history} />
           </AccordionPanel>
         </AccordionItem>
         <AccordionItem>
