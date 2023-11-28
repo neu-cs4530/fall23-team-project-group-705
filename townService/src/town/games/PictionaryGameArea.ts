@@ -62,7 +62,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
       // If we haven't yet recorded the outcome, do so now.
       const gameID = this._game?.id;
       if (gameID && !this._history.find(eachResult => eachResult.gameID === gameID)) {
-        // const { scores } = updatedState.state;
+        const { scores } = updatedState.state;
         if (updatedState.state.status === 'OVER') {
           this._history.push({
             gameID,
