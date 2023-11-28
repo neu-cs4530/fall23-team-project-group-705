@@ -2,6 +2,7 @@ import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
 import { Payload } from '../../components/Town/interactables/Whiteboard/Whiteboard';
 import {
   WhiteboardArea as WhiteboardAreaModel,
+  WhiteboardCommand,
   WhiteboardPlayer,
   WhiteboardServerResponse,
 } from '../../types/CoveyTownSocket';
@@ -221,23 +222,17 @@ export default class WhiteboardAreaController extends InteractableAreaController
     }
   }
 
-  public async drawerChange(newDrawerId: string) {
+  public async drawerChange(newDrawerId: string, eraseBoard?: boolean) {
     await this._townController.sendInteractableCommand(this.id, {
       type: 'WhiteboardDrawerChange',
       newDrawerId,
+      eraseBoard,
     });
   }
 
   public async clearDrawer() {
     await this._townController.sendInteractableCommand(this.id, {
       type: 'WhiteboardClearDrawerChange',
-    });
-  }
-
-  public async eraseBoard() {
-    console.log("Whiteboard Controller, erase board");
-    await this._townController.sendInteractableCommand(this.id, {
-      type: 'WhiteboardErase',
     });
   }
 }

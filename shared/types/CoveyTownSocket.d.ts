@@ -212,7 +212,7 @@ interface InteractableCommandBase {
 
 export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<PictionaryMove> | LeaveGameCommand | StartGameCommand | WhiteboardCommand;
 
-export type WhiteboardCommand = WhiteboardJoin | WhiteboardLeave | WhiteboardChange | WhiteboardPointerChange | WhiteboardDrawerChange | WhiteboardErase | WhiteboardClearDrawerChange;
+export type WhiteboardCommand = WhiteboardJoin | WhiteboardLeave | WhiteboardChange | WhiteboardPointerChange | WhiteboardDrawerChange | WhiteboardClearDrawerChange;
 
 export type WhiteboardJoin = {
   type: 'WhiteboardJoin';
@@ -235,14 +235,11 @@ export type WhiteboardPointerChange = {
 export type WhiteboardDrawerChange = {
   type: 'WhiteboardDrawerChange';
   newDrawerId: string;
+  eraseBoard?: boolean;
 }
 
 export type WhiteboardClearDrawerChange = {
   type: 'WhiteboardClearDrawerChange';
-}
-
-export type WhiteboardErase = {
-  type: 'WhiteboardErase';
 }
 
 export interface ViewingAreaUpdateCommand  {

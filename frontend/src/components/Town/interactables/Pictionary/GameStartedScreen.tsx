@@ -50,7 +50,7 @@ function GameStartedScreen(props: { gameAreaController: PictionaryAreaController
   return (
     <HStack h={'2xl'} w={['sm', '2xl', '6xl']} alignItems='top' margin={2}>
       <Whiteboard interactableId={`${props.interactableID}WhiteboardArea`} isPictionaryWhiteboard={true} />
-      <VStack width={250} spacing='12' paddingTop={4}>
+      <VStack width={250} spacing='12' paddingTop={4} align="flex-start">
         <Heading as='h4' size='md'>
           {betweenTurns
             ? `${intermissionLength - timer} seconds until next turn.`

@@ -118,15 +118,11 @@ export default class WhiteboardArea extends InteractableArea {
     }
 
     if (command.type === 'WhiteboardDrawerChange') {
-      this._handleWhiteboardDrawerChange(player, command.newDrawerId);
+      this._handleWhiteboardDrawerChange(player, command.newDrawerId, command.eraseBoard);
     }
 
     if (command.type === 'WhiteboardClearDrawerChange') {
       this._handleWhiteboardClearDrawerChange();
-    }
-
-    if (command.type === 'WhiteboardErase') {
-      this._handleWhiteboardErase();
     }
 
     
@@ -246,7 +242,7 @@ export default class WhiteboardArea extends InteractableArea {
     });
   }
 
-  private _handleWhiteboardDrawerChange(player: Player, newDrawerId: string) {
+  private _handleWhiteboardDrawerChange(player: Player, newDrawerId: string, eraseBoard: boolean | undefined) {
     if ((this._drawer && newDrawerId === this._drawer.id)) {
       return;
     }
@@ -262,6 +258,10 @@ export default class WhiteboardArea extends InteractableArea {
       this._viewers.push(this._drawer);
     }
     this._drawer = newDrawer;
+
+    if (eraseBoard) {
+      this._eraseWhiteboard();
+    }
 
     this._emitWhiteboardEvent({
       id: this.id,
@@ -300,7 +300,7 @@ export default class WhiteboardArea extends InteractableArea {
   }
 
   // For if we want to reset the whiteboard state while it is active
-  private _handleWhiteboardErase() {
+  private _eraseWhiteboard() {
     const elements: unknown = [];
     console.log("Whiteboard area, erase board");
     this._townEmitter.emit('whiteboardReponse', {

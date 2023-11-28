@@ -129,13 +129,10 @@ export default class PictionaryAreaController extends GameAreaController<
     } else if (leaveGame) {
       await this._whiteboardAreaController.leaveArea();
     }
-    if (newDrawer || clearDrawer) {
-      await this._whiteboardAreaController.eraseBoard();
-      if (clearDrawer) {
-        await this._whiteboardAreaController.clearDrawer();
-      } else if (newDrawer) {
-        await this._whiteboardAreaController.drawerChange(newDrawer);
-      }
+    if (clearDrawer) {
+      await this._whiteboardAreaController.clearDrawer();
+    } else if (newDrawer) {
+      await this._whiteboardAreaController.drawerChange(newDrawer, true);
     }
   }
 
