@@ -61,10 +61,12 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
       const gameID = this._game?.id;
       if (gameID && !this._history.find(eachResult => eachResult.gameID === gameID)) {
         const { scores } = updatedState.state;
-        this._history.push({
-          gameID,
-          scores: this._scoresWithName(updatedState.state),
-        });
+        if (updatedState.state.status === 'OVER') {
+          this._history.push({
+            gameID,
+            scores: this._scoresWithName(updatedState.state),
+          });
+        }
       }
     }
     this._emitAreaChanged();
