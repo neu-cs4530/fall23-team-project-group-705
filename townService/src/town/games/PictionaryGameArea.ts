@@ -159,7 +159,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
   }
 
-  // Ticks the game forwards by one second, updating both back and frontend.
+  // Ticks the game forwards by one second, updating both back and frontend
   private _tick(): void {
     if (this._game !== undefined) {
       this._game.tick();
