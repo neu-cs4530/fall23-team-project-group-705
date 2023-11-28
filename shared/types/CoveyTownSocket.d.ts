@@ -152,6 +152,7 @@ export interface PictionaryGameState extends WinnableGameState {
   drawer?: PlayerID;
   alreadyGuessedCorrectly?: PlayerID[];
   scores?: Record<PlayerID,number>;
+  whiteboardID: string;
 }
 
 export type InteractableID = string;
@@ -211,7 +212,7 @@ interface InteractableCommandBase {
 
 export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<PictionaryMove> | LeaveGameCommand | StartGameCommand | WhiteboardCommand;
 
-export type WhiteboardCommand = WhiteboardJoin | WhiteboardLeave | WhiteboardChange | WhiteboardPointerChange | WhiteboardDrawerChange
+export type WhiteboardCommand = WhiteboardJoin | WhiteboardLeave | WhiteboardChange | WhiteboardPointerChange | WhiteboardDrawerChange | WhiteboardErase
 
 export type WhiteboardJoin = {
   type: 'WhiteboardJoin';
@@ -233,7 +234,11 @@ export type WhiteboardPointerChange = {
 
 export type WhiteboardDrawerChange = {
   type: 'WhiteboardDrawerChange';
-  newDrawerId: string;
+  newDrawerId?: string;
+}
+
+export type WhiteboardErase = {
+  type: 'WhiteboardErase';
 }
 
 export interface ViewingAreaUpdateCommand  {
@@ -325,7 +330,7 @@ export type WhiteboardPointerUpdate = {
 export type WhiteboardNewDrawer = {
   id: string;
   type: "WhiteboardNewDrawer";
-  drawer: WhiteboardPlayer | undefined;
+  drawer: WhiteboardPlayer;
   viewers: WhiteboardPlayer[];
 }
 

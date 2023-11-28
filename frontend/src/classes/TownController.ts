@@ -1,6 +1,6 @@
 import assert from 'assert';
 import EventEmitter from 'events';
-import _ from 'lodash';
+import _, { each } from 'lodash';
 import { nanoid } from 'nanoid';
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
@@ -21,6 +21,7 @@ import {
   InteractableCommandBase,
   InteractableCommandResponse,
   InteractableID,
+  PictionaryGameState,
   PlayerID,
   PlayerLocation,
   TownSettingsUpdate,
@@ -629,6 +630,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         );
 
         this._interactableControllers = [];
+        const whiteboardAreaControllers: WhiteboardAreaController[] = []
         initialData.interactables.forEach(eachInteractable => {
           if (isConversationArea(eachInteractable)) {
             this._interactableControllers.push(
@@ -640,13 +642,12 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
           } else if (isViewingArea(eachInteractable)) {
             this._interactableControllers.push(new ViewingAreaController(eachInteractable));
           } else if (isWhiteboardArea(eachInteractable)) {
-            console.log(`creating whiteboard area controller, ID: ${eachInteractable.id}`);
+            const whiteboardAreaController = new WhiteboardAreaController(eachInteractable.id, eachInteractable, this);
             this._interactableControllers.push(
-              new WhiteboardAreaController(eachInteractable.id, eachInteractable, this),
+              whiteboardAreaController,
             );
-          } else if (isPictionaryArea(eachInteractable)) {
-            this._interactableControllers.push(
-              new PictionaryAreaController(eachInteractable.id, eachInteractable, this),
+            whiteboardAreaControllers.push(
+              whiteboardAreaController,
             );
           } else if (isTicTacToeArea(eachInteractable)) {
             this._interactableControllers.push(
@@ -654,6 +655,19 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             );
           }
         });
+        initialData.interactables.forEach(eachInteractable => {
+          if (isPictionaryArea(eachInteractable)) {
+            const whiteboardAreaController = whiteboardAreaControllers.find((whiteboardAreaController) => {
+              return whiteboardAreaController.id === `${eachInteractable.id}WhiteboardArea`
+            });
+            if(!whiteboardAreaController) {
+              throw new Error("PictionaryAreaController is missing it's companion WhiteboardAreaController.");
+            }
+            this._interactableControllers.push(
+              new PictionaryAreaController(eachInteractable.id, eachInteractable, this, whiteboardAreaController),
+            );
+          }
+        })
         this._userID = initialData.userID;
         this._ourPlayer = this.players.find(eachPlayer => eachPlayer.id == this.userID);
         this.emit('connect', initialData.providerVideoToken);

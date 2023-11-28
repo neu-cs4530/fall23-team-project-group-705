@@ -1,6 +1,9 @@
 import { GameArea, GameStatus, PictionaryGameState, PlayerID } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
 import GameAreaController, { GameEventTypes } from './GameAreaController';
+import WhiteboardAreaController from './WhiteboardAreaController';
+import TownController, { useInteractableAreaController } from '../TownController';
+
 
 export const PLAYER_NOT_IN_GAME_ERROR = 'Player is not in game';
 export const NO_GAME_IN_PROGRESS_ERROR = 'No game in progress';
@@ -17,6 +20,13 @@ export default class PictionaryAreaController extends GameAreaController<
   PictionaryGameState,
   PictionaryEvents
 > {
+  private _whiteboardAreaController: WhiteboardAreaController;
+
+  public constructor(id: string, gameArea: GameArea<PictionaryGameState>, townController: TownController, whiteboardAreaController: WhiteboardAreaController) {
+    super(id, gameArea, townController);
+    this._whiteboardAreaController = whiteboardAreaController;
+  }
+
   /**
    * Returns the current word being guessed.
    */
@@ -124,7 +134,26 @@ export default class PictionaryAreaController extends GameAreaController<
    * If the turn has not changed, does not emit the event.
    */
   protected _updateFrom(newModel: GameArea<PictionaryGameState>): void {
+    const newDrawer = newModel.game?.state.drawer;
+    if (this._model.game?.state.drawer !== newDrawer) {
+      this._whiteboardAreaController.eraseBoard();
+      if(newDrawer) {
+        this._whiteboardAreaController.drawerChange(newDrawer);
+      } else {
+        this._whiteboardAreaController.clearDrawer();
+      }
+    }
+
     super._updateFrom(newModel);
+  }
+
+  public async joinGame() {
+    await super.joinGame().then(async () => {
+      await this._whiteboardAreaController.joinArea().catch((reason) => {
+        this.leaveGame();
+        throw new Error(reason);
+      });
+    });
   }
 
   /**

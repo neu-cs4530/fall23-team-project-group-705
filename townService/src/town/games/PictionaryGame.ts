@@ -19,14 +19,12 @@ import {
 } from '../../types/CoveyTownSocket';
 import Game from './Game';
 import PICTIONARY_WORDLIST from './PictionaryWordlist';
-import WhiteboardArea from '../WhiteboardArea';
 
 /**
  * A PictionaryGame is a Game that implements the rules of Pictionary.
  */
 export default class PictionaryGame extends Game<PictionaryGameState, PictionaryMove> {
   private _wordlist: string[];
-  private _whiteboardArea: WhiteboardArea;
 
   // TODO: Give these a single point of control for all classes
   // The length, in seconds. of one drawer's turn.
@@ -35,14 +33,14 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   // The length, in seconds, between turns.
   public static readonly intermissionLength = 5;
 
-  public constructor(whiteboardArea: WhiteboardArea) {
+  public constructor(whiteboardID: string) {
     super({
       currentWord: '',
       timer: 0,
       status: 'WAITING_TO_START',
+      whiteboardID,
     });
     this._wordlist = PICTIONARY_WORDLIST;
-    this._whiteboardArea = whiteboardArea;
     this.newWord();
   }
 

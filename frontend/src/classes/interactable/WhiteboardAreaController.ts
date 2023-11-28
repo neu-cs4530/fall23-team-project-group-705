@@ -91,6 +91,7 @@ export default class WhiteboardAreaController extends InteractableAreaController
     }
 
     if (response.type === 'WhiteboardNewDrawer') {
+      console.log('handling new drawer');
       this._handleNewDrawer(response.drawer, response.viewers);
     }
   }
@@ -154,7 +155,7 @@ export default class WhiteboardAreaController extends InteractableAreaController
     });
   }
 
-  private _handleNewDrawer(drawer: WhiteboardPlayer | undefined, viewers: WhiteboardPlayer[]) {
+  private _handleNewDrawer(drawer: WhiteboardPlayer, viewers: WhiteboardPlayer[]) {
     this._model.drawer = drawer;
     this._model.viewers = viewers;
     this.emit('whiteboardNewDrawer', {
@@ -215,6 +216,19 @@ export default class WhiteboardAreaController extends InteractableAreaController
     await this._townController.sendInteractableCommand(this.id, {
       type: 'WhiteboardDrawerChange',
       newDrawerId,
+    });
+  }
+
+  public async clearDrawer() {
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'WhiteboardDrawerChange',
+      newDrawerId: undefined,
+    });
+  }
+
+  public async eraseBoard() {
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'WhiteboardErase',
     });
   }
 }

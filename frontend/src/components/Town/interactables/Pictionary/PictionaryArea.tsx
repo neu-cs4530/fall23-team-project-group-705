@@ -172,11 +172,10 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       </b>
     );
   }
-
   return (
     <Container maxW={'fit-content'} maxH={'fit-content'}>
       {gameStatus === 'IN_PROGRESS' ? (
-        <GameStartedScreen gameAreaController={gameAreaController} />
+        <GameStartedScreen gameAreaController={gameAreaController} interactableID={interactableID} />
       ) : (
         <GameNotStartedScreen gameStatusText={gameStatusText} observers={observers} />
       )}
