@@ -404,7 +404,7 @@ export default class Town {
     const gameAreas: InteractableArea[] = [];
     objectLayer.objects
       .filter(eachObject => eachObject.type === 'GameArea')
-      .forEach((eachGameAreaObj) => {
+      .forEach(eachGameAreaObj => {
         const constructedGameAreas = GameAreaFactory(eachGameAreaObj, this._broadcastEmitter);
         constructedGameAreas.forEach(constructedGameArea => gameAreas.push(constructedGameArea));
       });

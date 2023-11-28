@@ -2,7 +2,6 @@ import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
 import { Payload } from '../../components/Town/interactables/Whiteboard/Whiteboard';
 import {
   WhiteboardArea as WhiteboardAreaModel,
-  WhiteboardCommand,
   WhiteboardPlayer,
   WhiteboardServerResponse,
 } from '../../types/CoveyTownSocket';
@@ -59,9 +58,7 @@ export default class WhiteboardAreaController extends InteractableAreaController
       : this._model.drawer.id === this._townController.ourPlayer.id;
   }
 
-  protected _updateFrom(newModel: WhiteboardAreaModel): void {
-    // TODO: Update the board
-  }
+  protected _updateFrom(newModel: WhiteboardAreaModel): void {}
 
   public handleServerResponse(response: WhiteboardServerResponse) {
     if (response.type === 'WhiteboardPlayerJoin') {

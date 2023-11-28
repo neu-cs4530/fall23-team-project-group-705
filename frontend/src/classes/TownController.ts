@@ -1,6 +1,6 @@
 import assert from 'assert';
 import EventEmitter from 'events';
-import _, { each } from 'lodash';
+import _ from 'lodash';
 import { nanoid } from 'nanoid';
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
@@ -21,7 +21,6 @@ import {
   InteractableCommandBase,
   InteractableCommandResponse,
   InteractableID,
-  PictionaryGameState,
   PlayerID,
   PlayerLocation,
   TownSettingsUpdate,
@@ -44,7 +43,6 @@ import ViewingAreaController from './interactable/ViewingAreaController';
 import WhiteboardAreaController from './interactable/WhiteboardAreaController';
 import PictionaryAreaController from './interactable/PictionaryAreaController';
 import PlayerController from './PlayerController';
-import WhiteboardArea from '../components/Town/interactables/Whiteboard/WhiteboardArea';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -630,7 +628,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         );
 
         this._interactableControllers = [];
-        const whiteboardAreaControllers: WhiteboardAreaController[] = []
+        const whiteboardAreaControllers: WhiteboardAreaController[] = [];
         initialData.interactables.forEach(eachInteractable => {
           if (isConversationArea(eachInteractable)) {
             this._interactableControllers.push(
@@ -642,13 +640,13 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
           } else if (isViewingArea(eachInteractable)) {
             this._interactableControllers.push(new ViewingAreaController(eachInteractable));
           } else if (isWhiteboardArea(eachInteractable)) {
-            const whiteboardAreaController = new WhiteboardAreaController(eachInteractable.id, eachInteractable, this);
-            this._interactableControllers.push(
-              whiteboardAreaController,
+            const whiteboardAreaController = new WhiteboardAreaController(
+              eachInteractable.id,
+              eachInteractable,
+              this,
             );
-            whiteboardAreaControllers.push(
-              whiteboardAreaController,
-            );
+            this._interactableControllers.push(whiteboardAreaController);
+            whiteboardAreaControllers.push(whiteboardAreaController);
           } else if (isTicTacToeArea(eachInteractable)) {
             this._interactableControllers.push(
               new TicTacToeAreaController(eachInteractable.id, eachInteractable, this),
@@ -657,17 +655,24 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         });
         initialData.interactables.forEach(eachInteractable => {
           if (isPictionaryArea(eachInteractable)) {
-            const whiteboardAreaController = whiteboardAreaControllers.find((whiteboardAreaController) => {
-              return whiteboardAreaController.id === `${eachInteractable.id}WhiteboardArea`
+            const whiteboardAreaController = whiteboardAreaControllers.find(areaController => {
+              return areaController.id === `${eachInteractable.id}WhiteboardArea`;
             });
-            if(!whiteboardAreaController) {
-              throw new Error("PictionaryAreaController is missing it's companion WhiteboardAreaController.");
+            if (!whiteboardAreaController) {
+              throw new Error(
+                "PictionaryAreaController is missing it's companion WhiteboardAreaController.",
+              );
             }
             this._interactableControllers.push(
-              new PictionaryAreaController(eachInteractable.id, eachInteractable, this, whiteboardAreaController),
+              new PictionaryAreaController(
+                eachInteractable.id,
+                eachInteractable,
+                this,
+                whiteboardAreaController,
+              ),
             );
           }
-        })
+        });
         this._userID = initialData.userID;
         this._ourPlayer = this.players.find(eachPlayer => eachPlayer.id == this.userID);
         this.emit('connect', initialData.providerVideoToken);
@@ -819,9 +824,10 @@ export function useTownSettings() {
  */
 export function useInteractableAreaController<T>(interactableAreaID: string): T {
   const townController = useTownController();
-  const interactableAreaController = [...townController.gameAreas, ...townController.whiteboardAreas].find(
-    eachArea => eachArea.id == interactableAreaID,
-  );
+  const interactableAreaController = [
+    ...townController.gameAreas,
+    ...townController.whiteboardAreas,
+  ].find(eachArea => eachArea.id == interactableAreaID);
   if (!interactableAreaController) {
     throw new Error(`Requested interactable area ${interactableAreaID} does not exist`);
   }

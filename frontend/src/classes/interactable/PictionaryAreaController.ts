@@ -2,10 +2,7 @@ import { GameArea, GameStatus, PictionaryGameState, PlayerID } from '../../types
 import PlayerController from '../PlayerController';
 import GameAreaController, { GameEventTypes } from './GameAreaController';
 import WhiteboardAreaController from './WhiteboardAreaController';
-import TownController, { useInteractableAreaController } from '../TownController';
-import { clear } from 'console';
-import { join } from 'path';
-
+import TownController from '../TownController';
 
 export const PLAYER_NOT_IN_GAME_ERROR = 'Player is not in game';
 export const NO_GAME_IN_PROGRESS_ERROR = 'No game in progress';
@@ -24,7 +21,12 @@ export default class PictionaryAreaController extends GameAreaController<
 > {
   private _whiteboardAreaController: WhiteboardAreaController;
 
-  public constructor(id: string, gameArea: GameArea<PictionaryGameState>, townController: TownController, whiteboardAreaController: WhiteboardAreaController) {
+  public constructor(
+    id: string,
+    gameArea: GameArea<PictionaryGameState>,
+    townController: TownController,
+    whiteboardAreaController: WhiteboardAreaController,
+  ) {
     super(id, gameArea, townController);
     this._whiteboardAreaController = whiteboardAreaController;
   }
@@ -123,7 +125,12 @@ export default class PictionaryAreaController extends GameAreaController<
     return this._model.game?.state.scores;
   }
 
-  private async _updateWhiteboard(joinGame: boolean, leaveGame: boolean, clearDrawer: boolean, newDrawer?: string): Promise<void> {
+  private async _updateWhiteboard(
+    joinGame: boolean,
+    leaveGame: boolean,
+    clearDrawer: boolean,
+    newDrawer?: string,
+  ): Promise<void> {
     if (joinGame) {
       await this._whiteboardAreaController.joinArea();
     } else if (leaveGame) {
@@ -142,14 +149,18 @@ export default class PictionaryAreaController extends GameAreaController<
    * Calls super._updateFrom, which updates the occupants of this game area and
    * other common properties (including this._model).
    */
-  protected _updateFrom(newModel: GameArea<PictionaryGameState>): void {    
-    const playerInCurrentModel = this._model.game !== undefined && this._model.game.players.includes(this._townController.ourPlayer.id);
-    const playerInNewModel = newModel.game !== undefined && newModel.game.players.includes(this._townController.ourPlayer.id);
+  protected _updateFrom(newModel: GameArea<PictionaryGameState>): void {
+    const playerInCurrentModel =
+      this._model.game !== undefined &&
+      this._model.game.players.includes(this._townController.ourPlayer.id);
+    const playerInNewModel =
+      newModel.game !== undefined &&
+      newModel.game.players.includes(this._townController.ourPlayer.id);
     const joinGame = !playerInCurrentModel && playerInNewModel;
     const leaveGame = playerInCurrentModel && !playerInNewModel;
     const newDrawer = newModel.game?.state.drawer;
     const isNewDrawer = this._model.game?.state.drawer !== newDrawer;
-    const clearDrawer = isNewDrawer && (newDrawer === undefined);
+    const clearDrawer = isNewDrawer && newDrawer === undefined;
 
     if (isNewDrawer) {
       this._updateWhiteboard(joinGame, leaveGame, clearDrawer, newDrawer);

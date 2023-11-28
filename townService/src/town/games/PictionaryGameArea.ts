@@ -26,7 +26,12 @@ import PictionaryGame from './PictionaryGame';
 export default class PictionaryGameArea extends GameArea<PictionaryGame> {
   private _whiteboardID: string;
 
-  public constructor(id: string, { x, y, width, height }: BoundingBox, townEmitter: TownEmitter, whiteboardID: string) {
+  public constructor(
+    id: string,
+    { x, y, width, height }: BoundingBox,
+    townEmitter: TownEmitter,
+    whiteboardID: string,
+  ) {
     super(id, { x, y, width, height }, townEmitter);
     this._whiteboardID = whiteboardID;
     setTimeout(() => {

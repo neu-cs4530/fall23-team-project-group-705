@@ -1,12 +1,14 @@
 import { HStack, VStack, Heading, Flex, Input, Button, useToast } from '@chakra-ui/react';
-import { Excalidraw } from '@excalidraw/excalidraw';
 import EndGameScore from './EndGameScore';
 import PictionaryAreaController from '../../../../classes/interactable/PictionaryAreaController';
 import React, { useEffect, useState } from 'react';
 import Whiteboard from '../Whiteboard/Whiteboard';
 import { InteractableID } from '../../../../types/CoveyTownSocket';
 
-function GameStartedScreen(props: { gameAreaController: PictionaryAreaController, interactableID: InteractableID }): JSX.Element {
+function GameStartedScreen(props: {
+  gameAreaController: PictionaryAreaController;
+  interactableID: InteractableID;
+}): JSX.Element {
   const gameAreaController: PictionaryAreaController = props.gameAreaController;
 
   const [isPlayer, setIsPlayer] = useState<boolean>(gameAreaController.isPlayer);
@@ -49,8 +51,11 @@ function GameStartedScreen(props: { gameAreaController: PictionaryAreaController
 
   return (
     <HStack h={'2xl'} w={['sm', '2xl', '6xl']} alignItems='top' margin={2}>
-      <Whiteboard interactableId={`${props.interactableID}WhiteboardArea`} isPictionaryWhiteboard={true} />
-      <VStack width={250} spacing='12' paddingTop={4} align="flex-start">
+      <Whiteboard
+        interactableId={`${props.interactableID}WhiteboardArea`}
+        isPictionaryWhiteboard={true}
+      />
+      <VStack width={250} spacing='12' paddingTop={4} align='flex-start'>
         <Heading as='h4' size='md'>
           {betweenTurns
             ? `${intermissionLength - timer} seconds until next turn.`

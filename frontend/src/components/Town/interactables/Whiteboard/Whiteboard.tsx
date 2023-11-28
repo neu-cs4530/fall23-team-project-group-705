@@ -10,20 +10,15 @@ import throttle from 'lodash.throttle';
 
 const THROTTLE_TIMEOUT = 20;
 
-export default function Whiteboard({ interactableId, isPictionaryWhiteboard }: { interactableId: string, isPictionaryWhiteboard: boolean}) {
+export default function Whiteboard({
+  interactableId,
+  isPictionaryWhiteboard,
+}: {
+  interactableId: string;
+  isPictionaryWhiteboard: boolean;
+}) {
   const townController = useTownController();
   const whiteboardController = townController.getWhiteboardAreaController(interactableId);
-
-  // Initialize state
-  useEffect(() => {
-    setIsDrawerState(whiteboardController.isDrawer());
-    setViewers(whiteboardController.viewers);
-    setCollaborators({
-      newDrawer: whiteboardController.drawer,
-      newViewers: whiteboardController.viewers,
-    });
-  }, []);
-
   const [excalidrawState, setExcalidrawState] = useState<ExcalidrawImperativeAPI | null>();
   const refCallback = useCallback(
     (value: ExcalidrawImperativeAPI | null) => setExcalidrawState(value),
@@ -88,6 +83,16 @@ export default function Whiteboard({ interactableId, isPictionaryWhiteboard }: {
     },
     [excalidrawState],
   );
+
+  // Initialize state
+  useEffect(() => {
+    setIsDrawerState(whiteboardController.isDrawer());
+    setViewers(whiteboardController.viewers);
+    setCollaborators({
+      newDrawer: whiteboardController.drawer,
+      newViewers: whiteboardController.viewers,
+    });
+  }, [setCollaborators, whiteboardController]);
 
   useEffect(() => {
     const handleJoin = ({ player, isDrawer }: { player: WhiteboardPlayer; isDrawer: boolean }) => {
