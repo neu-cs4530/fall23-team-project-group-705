@@ -10,25 +10,14 @@ import {
   ListItem,
 } from '@chakra-ui/react';
 import PlayerController from '../../../../classes/PlayerController';
-import React, { useEffect, useState } from 'react';
-import PictionaryAreaController from '../../../../classes/interactable/PictionaryAreaController';
-import { GameResult } from '../../../../types/CoveyTownSocket';
-import Leaderboard from '../Leaderboard';
+import React from 'react';
 
 function GameNotStartedScreen(props: {
-  gameAreaController: PictionaryAreaController;
   gameStatusText: JSX.Element;
   observers: PlayerController[];
 }): JSX.Element {
   const gameStatusText: JSX.Element = props.gameStatusText;
   const observers: PlayerController[] = props.observers;
-  const gameAreaController: PictionaryAreaController = props.gameAreaController;
-  const [history, setHistory] = useState<GameResult[]>(gameAreaController.history);
-
-  useEffect(() => {
-    setHistory(gameAreaController.history);
-  }, []);
-
   return (
     <div>
       <Accordion allowToggle>
@@ -41,9 +30,6 @@ function GameNotStartedScreen(props: {
               </Box>
             </AccordionButton>
           </Heading>
-          <AccordionPanel>
-            <Leaderboard results={history} />
-          </AccordionPanel>
         </AccordionItem>
         <AccordionItem>
           <Heading as='h3'>

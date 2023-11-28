@@ -307,9 +307,4 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
 
     return maxScorePlayerID;
   }
-
-  public findplayer(id: PlayerID): string {
-    const targetPlayer = this._players.find(player => player.id === id);
-    return targetPlayer ? targetPlayer.userName : 'Player not found';
-  }
 }

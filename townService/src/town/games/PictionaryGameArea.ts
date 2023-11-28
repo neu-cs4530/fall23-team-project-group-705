@@ -14,7 +14,6 @@ import {
   PictionaryGameState,
   BoundingBox,
   TownEmitter,
-  PlayerID,
 } from '../../types/CoveyTownSocket';
 import GameArea from './GameArea';
 import PictionaryGame from './PictionaryGame';
@@ -36,38 +35,24 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     return 'PictionaryArea';
   }
 
-  private _findPlayerName(id: PlayerID): string | undefined {
-    return this._game?.findplayer(id);
-  }
-
-  private _scoresWithName(state: PictionaryGameState): { [playerName: string]: number } {
-    const scoresWithName: { [playerName: string]: number } = {};
-
-    if (state.scores) {
-      for (const playerId in state.scores) {
-        if (Object.prototype.hasOwnProperty.call(state.scores, playerId)) {
-          const playerName = this._findPlayerName(playerId);
-          if (playerName) {
-            scoresWithName[playerName] = state.scores[playerId];
-          }
-        }
-      }
-    }
-
-    return scoresWithName;
-  }
-
   private _stateUpdated(updatedState: GameInstance<PictionaryGameState>) {
     if (updatedState.state.status === 'OVER') {
       // If we haven't yet recorded the outcome, do so now.
       const gameID = this._game?.id;
       if (gameID && !this._history.find(eachResult => eachResult.gameID === gameID)) {
         const { scores } = updatedState.state;
-        if (this._game?.state.status === 'OVER') {
+        if (scores) {
+          /*
+          const xName = this._occupants.find(eachPlayer => eachPlayer.id === x)?.userName || x;
+          const oName = this._occupants.find(eachPlayer => eachPlayer.id === o)?.userName || o;
           this._history.push({
             gameID,
-            scores: this._scoresWithName(updatedState.state),
+            scores: {
+              [xName]: updatedState.state.winner === x ? 1 : 0,
+              [oName]: updatedState.state.winner === o ? 1 : 0,
+            },
           });
+          */
         }
       }
     }
