@@ -1,7 +1,6 @@
 import { nanoid } from 'nanoid';
 import { mock } from 'jest-mock-extended';
 import {
-  GameInstanceID,
   GameMove,
   PictionaryGameState,
   PictionaryMove,
@@ -130,9 +129,7 @@ describe('PictionaryGameArea', () => {
         ).toThrowError(GAME_NOT_IN_PROGRESS_MESSAGE);
       });
       describe('when there is a game in progress', () => {
-        let gameID: GameInstanceID;
         beforeEach(() => {
-          gameID = gameArea.handleCommand({ type: 'JoinGame' }, player1).gameID;
           gameArea.handleCommand({ type: 'JoinGame' }, player2);
           interactableUpdateSpy.mockClear();
         });

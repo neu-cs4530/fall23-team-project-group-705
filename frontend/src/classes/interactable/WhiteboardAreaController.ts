@@ -12,9 +12,7 @@ import InteractableAreaController, { BaseInteractableEventMap } from './Interact
  * The events that the WhiteboardAreaController emits to subscribers. These events
  * are only ever emitted to local components (not to the townService).
  */
-export type WhiteboardAreaEvent = BaseInteractableEventMap & {
-  boardChange: (newBoard: any | undefined) => void;
-};
+export type WhiteboardAreaEvent = BaseInteractableEventMap;
 
 /**
  * A WhiteboardAreaController manages the local behavior of a whiteboard area in the frontend,
@@ -58,7 +56,7 @@ export default class WhiteboardAreaController extends InteractableAreaController
       : this._model.drawer.id === this._townController.ourPlayer.id;
   }
 
-  protected _updateFrom(newModel: WhiteboardAreaModel): void {}
+  protected _updateFrom(): void {}
 
   public handleServerResponse(response: WhiteboardServerResponse) {
     if (response.type === 'WhiteboardPlayerJoin') {

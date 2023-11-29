@@ -30,7 +30,6 @@ describe('WhiteboardArea', () => {
 
   const viewer2Emitter = mock<TownEmitter>();
   const viewer2 = new Player('Viewer 2', viewer2Emitter);
-  const viewer2Spy = jest.spyOn(viewer2Emitter, 'emit');
   const whiteboardViewer2 = {
     id: viewer2.id,
     userName: viewer2.userName,
