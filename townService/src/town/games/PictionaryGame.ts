@@ -32,12 +32,11 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   // The length, in seconds, between turns.
   public static readonly intermissionLength = 5;
 
-  public constructor(whiteboardID: string) {
+  public constructor() {
     super({
       currentWord: '',
       timer: 0,
       status: 'WAITING_TO_START',
-      whiteboardID,
     });
     this._wordlist = PICTIONARY_WORDLIST;
     this.newWord();

@@ -152,7 +152,6 @@ export interface PictionaryGameState extends WinnableGameState {
   drawer?: PlayerID;
   alreadyGuessedCorrectly?: PlayerID[];
   scores?: Record<PlayerID,number>;
-  whiteboardID: string;
 }
 
 export type InteractableID = string;

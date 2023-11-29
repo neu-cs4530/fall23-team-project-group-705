@@ -121,7 +121,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
       let game = this._game;
       if (!game || game.state.status === 'OVER') {
         // No game in progress, make a new one
-        game = new PictionaryGame(this.whiteboardID);
+        game = new PictionaryGame();
         this._game = game;
       }
       game.join(player);
