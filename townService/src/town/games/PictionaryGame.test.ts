@@ -84,12 +84,14 @@ describe('PictionaryGame', () => {
         expect(() => game.leave(player4)).not.toThrowError();
       });
       it('should end the game when there is no player', () => {
+        expect(game.state.status).toEqual('IN_PROGRESS');
         game.leave(player1);
         game.leave(player2);
         game.leave(player3);
         expect(game.state.status).toEqual('OVER');
       });
       it('should change the drawer when drawer leaves', () => {
+        expect(game.state.drawer).toEqual(player1.id);
         game.leave(player1);
         expect(game.state.drawer).toEqual(player2.id);
       });
