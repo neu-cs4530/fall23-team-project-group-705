@@ -31,10 +31,7 @@ export default function GameAreaFactory(
       { x: 0, y: 0, width: 0, height: 0 },
       broadcastEmitter,
     );
-    return [
-      new PictionaryGameArea(name, rect, broadcastEmitter, whiteboardArea.id),
-      whiteboardArea,
-    ];
+    return [new PictionaryGameArea(name, rect, broadcastEmitter), whiteboardArea];
   }
   throw new Error(`Unknown game area type ${mapObject.class}`);
 }

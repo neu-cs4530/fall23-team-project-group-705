@@ -59,6 +59,14 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   const [joiningGame, setJoiningGame] = useState(false);
   const [drawer, setDrawer] = useState<PlayerController | undefined>(gameAreaController.drawer);
   const toast = useToast();
+  const gameArea = useInteractable<GameAreaInteractable>('gameArea');
+
+  useEffect(() => {
+    if (gameArea) {
+      console.log('pause town controller');
+      townController.pause();
+    }
+  }, [gameArea, townController]);
 
   useEffect(() => {
     const updateGameState = () => {
@@ -97,7 +105,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     };
   }, [
     townController,
-    gameAreaController.history,
     gameAreaController.isPlayer,
     gameAreaController.status,
     gameAreaController.observers,
@@ -195,11 +202,13 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
 export default function PictionaryAreaWrapper(): JSX.Element {
   const gameArea = useInteractable<GameAreaInteractable>('gameArea');
   const townController = useTownController();
+
   const closeModal = useCallback(() => {
     if (gameArea) {
       townController.interactEnd(gameArea);
       const controller = townController.getGameAreaController(gameArea);
       controller.leaveGame();
+      townController.unPause();
     }
   }, [townController, gameArea]);
 

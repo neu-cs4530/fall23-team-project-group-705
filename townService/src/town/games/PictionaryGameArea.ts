@@ -25,17 +25,13 @@ import PictionaryGame from './PictionaryGame';
  * @see GameArea
  */
 export default class PictionaryGameArea extends GameArea<PictionaryGame> {
-  private _whiteboardID: string;
-
   public constructor(
     id: string,
     { x, y, width, height }: BoundingBox,
     townEmitter: TownEmitter,
-    whiteboardID: string,
     disableTickForTesting?: boolean,
   ) {
     super(id, { x, y, width, height }, townEmitter);
-    this._whiteboardID = whiteboardID;
     if (disableTickForTesting === undefined || !disableTickForTesting) {
       setTimeout(() => {
         this._tick();
@@ -64,10 +60,6 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
       }
     }
     return scoresWithName;
-  }
-
-  public get whiteboardID() {
-    return this._whiteboardID;
   }
 
   private _stateUpdated(updatedState: GameInstance<PictionaryGameState>) {
