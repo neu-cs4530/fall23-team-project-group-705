@@ -24,8 +24,16 @@ import PictionaryGame from './PictionaryGame';
  * @see GameArea
  */
 export default class PictionaryGameArea extends GameArea<PictionaryGame> {
-  public constructor(id: string, { x, y, width, height }: BoundingBox, townEmitter: TownEmitter) {
+  private _whiteboardID: string;
+
+  public constructor(
+    id: string,
+    { x, y, width, height }: BoundingBox,
+    townEmitter: TownEmitter,
+    whiteboardID: string,
+  ) {
     super(id, { x, y, width, height }, townEmitter);
+    this._whiteboardID = whiteboardID;
     setTimeout(() => {
       this._tick();
     }, 1000);
@@ -33,6 +41,10 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
 
   protected getType(): InteractableType {
     return 'PictionaryArea';
+  }
+
+  public get whiteboardID() {
+    return this._whiteboardID;
   }
 
   private _stateUpdated(updatedState: GameInstance<PictionaryGameState>) {

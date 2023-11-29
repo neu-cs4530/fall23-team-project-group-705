@@ -66,8 +66,7 @@ export interface WhiteboardArea extends Interactable {
 };
 
 export interface PictionaryArea extends Interactable {
-  // TODO: Add boardstate here
-  board?: any;
+  whiteboardModel: WhiteboardArea;
 };
 export interface BoundingBox {
   x: number;
@@ -212,7 +211,7 @@ interface InteractableCommandBase {
 
 export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<PictionaryMove> | LeaveGameCommand | StartGameCommand | WhiteboardCommand;
 
-export type WhiteboardCommand = WhiteboardJoin | WhiteboardLeave | WhiteboardChange | WhiteboardPointerChange | WhiteboardDrawerChange
+export type WhiteboardCommand = WhiteboardJoin | WhiteboardLeave | WhiteboardChange | WhiteboardPointerChange | WhiteboardDrawerChange | WhiteboardClearDrawerChange;
 
 export type WhiteboardJoin = {
   type: 'WhiteboardJoin';
@@ -235,6 +234,11 @@ export type WhiteboardPointerChange = {
 export type WhiteboardDrawerChange = {
   type: 'WhiteboardDrawerChange';
   newDrawerId: string;
+  eraseBoard?: boolean;
+}
+
+export type WhiteboardClearDrawerChange = {
+  type: 'WhiteboardClearDrawerChange';
 }
 
 export interface ViewingAreaUpdateCommand  {
@@ -284,7 +288,7 @@ export interface ServerToClientEvents {
   whiteboardReponse: (response: WhiteboardServerResponse) => void;
 }
 
-export type WhiteboardServerResponse = WhiteboardPlayerJoin | WhiteboardPlayerLeave | WhiteboardNewScene| WhiteboardPointerUpdate | WhiteboardNewDrawer;
+export type WhiteboardServerResponse = WhiteboardPlayerJoin | WhiteboardPlayerLeave | WhiteboardNewScene| WhiteboardPointerUpdate | WhiteboardNewDrawer | WhiteboardClearDrawer;
 
 export type WhiteboardPlayer = {
   id: string;
@@ -326,7 +330,13 @@ export type WhiteboardPointerUpdate = {
 export type WhiteboardNewDrawer = {
   id: string;
   type: "WhiteboardNewDrawer";
-  drawer: WhiteboardPlayer | undefined;
+  drawer: WhiteboardPlayer;
+  viewers: WhiteboardPlayer[];
+}
+
+export type WhiteboardClearDrawer = {
+  id: string;
+  type: "WhiteboardClearDrawer";
   viewers: WhiteboardPlayer[];
 }
 

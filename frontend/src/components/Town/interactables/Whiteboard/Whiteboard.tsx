@@ -10,10 +10,15 @@ import throttle from 'lodash.throttle';
 
 const THROTTLE_TIMEOUT = 20;
 
-export default function Whiteboard({ interactableId }: { interactableId: string }) {
+export default function Whiteboard({
+  interactableId,
+  isPictionaryWhiteboard,
+}: {
+  interactableId: string;
+  isPictionaryWhiteboard: boolean;
+}) {
   const townController = useTownController();
   const whiteboardController = townController.getWhiteboardAreaController(interactableId);
-
   const [excalidrawState, setExcalidrawState] = useState<ExcalidrawImperativeAPI | null>();
   const refCallback = useCallback(
     (value: ExcalidrawImperativeAPI | null) => setExcalidrawState(value),
@@ -35,16 +40,18 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
       description: string;
       status: AlertStatus;
     }) => {
-      toast({
-        title,
-        description,
-        status,
-        isClosable: true,
-        position: 'top-right',
-        duration: 2000,
-      });
+      if (!isPictionaryWhiteboard) {
+        toast({
+          title,
+          description,
+          status,
+          isClosable: true,
+          position: 'top-right',
+          duration: 2000,
+        });
+      }
     },
-    [toast],
+    [toast, isPictionaryWhiteboard],
   );
 
   const setCollaborators = useCallback(
@@ -76,6 +83,16 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
     },
     [excalidrawState],
   );
+
+  // Initialize state
+  useEffect(() => {
+    setIsDrawerState(whiteboardController.isDrawer());
+    setViewers(whiteboardController.viewers);
+    setCollaborators({
+      newDrawer: whiteboardController.drawer,
+      newViewers: whiteboardController.viewers,
+    });
+  }, [setCollaborators, whiteboardController]);
 
   useEffect(() => {
     const handleJoin = ({ player, isDrawer }: { player: WhiteboardPlayer; isDrawer: boolean }) => {
@@ -115,6 +132,15 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
       });
     };
 
+    const handleClearDrawer = () => {
+      setIsDrawerState(false);
+      setViewers(whiteboardController.viewers);
+      setCollaborators({
+        newDrawer: undefined,
+        newViewers: whiteboardController.viewers,
+      });
+    };
+
     const handleLeave = ({ player }: { player: WhiteboardPlayer }) => {
       whiteboardToast({
         title: `Player Leave`,
@@ -144,7 +170,6 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
     }) => {
       const currentCollabs = excalidrawState?.getAppState().collaborators;
       const playerInfo = currentCollabs?.get(player.id);
-      console.log('pointer update for player', player.userName);
       currentCollabs?.set(player.id, {
         ...playerInfo,
         pointer: {
@@ -160,6 +185,7 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
 
     whiteboardController.addListener('whiteboardPlayerJoin', handleJoin);
     whiteboardController.addListener('whiteboardNewDrawer', handleNewDrawer);
+    whiteboardController.addListener('whiteboardClearDrawer', handleClearDrawer);
     whiteboardController.addListener('whiteboardPlayerLeave', handleLeave);
     whiteboardController.addListener('whiteboardNewScene', handleNewScene);
     whiteboardController.addListener('whiteboardPointerUpdate', handlePointerUpdate);
@@ -167,6 +193,7 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
     return () => {
       whiteboardController.removeListener('whiteboardPlayerJoin', handleJoin);
       whiteboardController.removeListener('whiteboardNewDrawer', handleNewDrawer);
+      whiteboardController.removeListener('whiteboardClearDrawer', handleClearDrawer);
       whiteboardController.removeListener('whiteboardPlayerLeave', handleLeave);
       whiteboardController.removeListener('whiteboardNewScene', handleNewScene);
       whiteboardController.removeListener('whiteboardPointerUpdate', handlePointerUpdate);
@@ -183,7 +210,7 @@ export default function Whiteboard({ interactableId }: { interactableId: string 
   return (
     <>
       <VStack h={'2xl'} w={['sm', '2xl', '6xl']} margin={2}>
-        {isDrawerState && (
+        {isDrawerState && !isPictionaryWhiteboard && (
           <form
             onSubmit={event => {
               event.preventDefault();

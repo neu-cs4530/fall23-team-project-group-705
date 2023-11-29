@@ -60,7 +60,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   }
 
   private _applyMove(move: PictionaryMove): void {
-    if (move.guessWord === this.state.currentWord) {
+    if (move.guessWord.toLowerCase() === this.state.currentWord.toLowerCase()) {
       // Guess was correct
 
       const newScores: Record<string, number> = this.state.scores ? this.state.scores : {};

@@ -33,7 +33,7 @@ export default function WhiteboardModal(): JSX.Element {
         <ModalContent maxW={'fit-content'} maxH={'fit-content'} marginTop={10}>
           <ModalHeader paddingBottom={0}>Whiteboard</ModalHeader>
           <ModalCloseButton />
-          <Whiteboard interactableId={whiteboardArea.id} />
+          <Whiteboard interactableId={whiteboardArea.id} isPictionaryWhiteboard={false} />
         </ModalContent>
       </Modal>
     );

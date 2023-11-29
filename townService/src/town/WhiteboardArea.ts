@@ -118,7 +118,11 @@ export default class WhiteboardArea extends InteractableArea {
     }
 
     if (command.type === 'WhiteboardDrawerChange') {
-      this._handleWhiteboardDrawerChange(player, command.newDrawerId);
+      this._handleWhiteboardDrawerChange(player, command.newDrawerId, command.eraseBoard);
+    }
+
+    if (command.type === 'WhiteboardClearDrawerChange') {
+      this._handleWhiteboardClearDrawerChange();
     }
 
     return undefined as InteractableCommandReturnType<CommandType>;
@@ -236,13 +240,30 @@ export default class WhiteboardArea extends InteractableArea {
     });
   }
 
-  private _handleWhiteboardDrawerChange(player: Player, newDrawerId: string) {
+  private _handleWhiteboardDrawerChange(
+    player: Player,
+    newDrawerId: string,
+    eraseBoard: boolean | undefined,
+  ) {
+    if (this._drawer && newDrawerId === this._drawer.id) {
+      return;
+    }
+
     const newDrawer = this._viewers.find(viewer => viewer.id === newDrawerId);
     this._viewers = this._viewers.filter(viewer => viewer.id !== newDrawerId);
+
+    if (newDrawer === undefined) {
+      return;
+    }
+
     if (this._drawer) {
       this._viewers.push(this._drawer);
     }
     this._drawer = newDrawer;
+
+    if (eraseBoard) {
+      this._eraseWhiteboard();
+    }
 
     this._emitWhiteboardEvent({
       id: this.id,
@@ -258,18 +279,41 @@ export default class WhiteboardArea extends InteractableArea {
     });
   }
 
+  private _handleWhiteboardClearDrawerChange() {
+    if (this._drawer) {
+      this._viewers.push(this._drawer);
+    }
+    this._drawer = undefined;
+
+    this._emitWhiteboardEvent({
+      id: this.id,
+      type: 'WhiteboardClearDrawer',
+      viewers: this._viewers.map(viewer => ({
+        id: viewer.id,
+        userName: viewer.userName,
+      })),
+    });
+  }
+
   private _resetWhiteboardState() {
     if (!this.isActive) {
       this._elements = [];
     }
   }
 
+  // For if we want to reset the whiteboard state while it is active
+  private _eraseWhiteboard() {
+    const elements: unknown = [];
+    this._townEmitter.emit('whiteboardReponse', {
+      id: this.id,
+      type: 'WhiteboardNewScene',
+      elements,
+    });
+
+    this._elements = [];
+  }
+
   private _emitWhiteboardEvent(content: WhiteboardServerResponse) {
-    try {
-      this._townEmitter.emit('whiteboardReponse', content);
-    } catch (err) {
-      // TODO: Remove this
-      console.error(err);
-    }
+    this._townEmitter.emit('whiteboardReponse', content);
   }
 }
