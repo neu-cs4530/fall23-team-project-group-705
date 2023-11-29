@@ -17,8 +17,21 @@ import {
 } from '../../lib/InvalidParametersError';
 
 class TestingGame extends Game<PictionaryGameState, PictionaryMove> {
+  private _applyMoveCounter = 0;
+
+  private _applyMoveData: GameMove<PictionaryMove> | undefined;
+
+  public get applyMoveCounter(): number {
+    return this._applyMoveCounter;
+  }
+
+  public get applyMoveData(): GameMove<PictionaryMove> | undefined {
+    return this._applyMoveData;
+  }
+
   public applyMove(move: GameMove<PictionaryMove>): void {
-    throw new Error('Method not implemented.');
+    this._applyMoveCounter++;
+    this._applyMoveData = move;
   }
 
   protected _join(player: Player): void {
@@ -122,8 +135,15 @@ describe('PictionaryGameArea', () => {
       it('should throw an error when there is no game in progress', () => {
         expect(() =>
           gameArea.handleCommand(
-            { type: 'GameMove', move: { col: 0, row: 0, gamePiece: 'X' }, gameID: nanoid() },
-            player1,
+            {
+              type: 'GameMove',
+              move: {
+                guesser: player2.id,
+                guessWord: 'cheese',
+              },
+              gameID: game.id,
+            },
+            player2,
           ),
         ).toThrowError(GAME_NOT_IN_PROGRESS_MESSAGE);
       });
@@ -135,10 +155,40 @@ describe('PictionaryGameArea', () => {
         it('should throw an error when the game ID does not match', () => {
           expect(() =>
             gameArea.handleCommand(
-              { type: 'GameMove', move: { col: 0, row: 0, gamePiece: 'X' }, gameID: nanoid() },
-              player1,
+              {
+                type: 'GameMove',
+                move: {
+                  guesser: player2.id,
+                  guessWord: 'cheese',
+                },
+                gameID: nanoid(),
+              },
+              player2,
             ),
           ).toThrowError(GAME_ID_MISSMATCH_MESSAGE);
+        });
+        it('should hand off the proper data to the game', () => {
+          gameArea.handleCommand(
+            {
+              type: 'GameMove',
+              move: {
+                guesser: player2.id,
+                guessWord: 'cheese',
+              },
+              gameID: game.id,
+            },
+            player2,
+          );
+          expect(game.applyMoveCounter).toEqual(1);
+          const moveData = {
+            gameID: game.id,
+            move: {
+              guesser: player2.id,
+              guessWord: 'cheese',
+            },
+            playerID: player2.id,
+          };
+          expect(game.applyMoveData).toEqual(moveData);
         });
       });
     });

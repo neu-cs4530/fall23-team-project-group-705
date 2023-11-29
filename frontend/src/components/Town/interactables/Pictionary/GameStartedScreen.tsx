@@ -16,6 +16,7 @@ function GameStartedScreen(props: {
   const [currentWord, setCurrentWord] = useState<string>(gameAreaController.currentWord);
   const [betweenTurns, setBetweenTurns] = useState(gameAreaController.betweenTurns);
   const [timer, setTimer] = useState(gameAreaController.timer);
+  const [players, setPlayers] = useState(gameAreaController.players);
   const [guess, setGuess] = useState('');
   const toast = useToast();
 
@@ -32,12 +33,14 @@ function GameStartedScreen(props: {
     setCurrentWord(gameAreaController.currentWord);
     setTimer(gameAreaController.timer);
     setBetweenTurns(gameAreaController.betweenTurns);
+    setPlayers(gameAreaController.players);
   }, [
     gameAreaController.isPlayer,
     gameAreaController.isOurTurn,
     gameAreaController.currentWord,
     gameAreaController.timer,
     gameAreaController.betweenTurns,
+    gameAreaController.players,
   ]);
 
   const currentWordDisplay = (
@@ -112,7 +115,7 @@ function GameStartedScreen(props: {
         ) : (
           <></>
         )}
-        <EndGameScore scores={gameAreaController.scores} />
+        <EndGameScore scores={gameAreaController.scores} players={players} />
       </VStack>
     </HStack>
   );
