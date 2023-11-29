@@ -25,7 +25,7 @@ function GameNotStartedScreen(props: {
   const [history, setHistory] = useState<GameResult[]>(gameAreaController.history);
   useEffect(() => {
     setHistory(gameAreaController.history);
-  }, []);
+  }, [gameAreaController.history]);
   return (
     <div>
       <Accordion allowToggle>
