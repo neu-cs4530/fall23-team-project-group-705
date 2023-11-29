@@ -118,5 +118,93 @@ describe('PictionaryGameArea', () => {
         });
       });
     });
+    describe('[T3.2] when given a GameMove command', () => {
+      it('should throw an error when there is no game in progress', () => {
+        expect(() =>
+          gameArea.handleCommand(
+            { type: 'GameMove', move: { col: 0, row: 0, gamePiece: 'X' }, gameID: nanoid() },
+            player1,
+          ),
+        ).toThrowError(GAME_NOT_IN_PROGRESS_MESSAGE);
+      });
+      describe('when there is a game in progress', () => {
+        let gameID: GameInstanceID;
+        beforeEach(() => {
+          gameID = gameArea.handleCommand({ type: 'JoinGame' }, player1).gameID;
+          gameArea.handleCommand({ type: 'JoinGame' }, player2);
+          interactableUpdateSpy.mockClear();
+        });
+        it('should throw an error when the game ID does not match', () => {
+          expect(() =>
+            gameArea.handleCommand(
+              { type: 'GameMove', move: { col: 0, row: 0, gamePiece: 'X' }, gameID: nanoid() },
+              player1,
+            ),
+          ).toThrowError(GAME_ID_MISSMATCH_MESSAGE);
+        });
+      });
+    });
+    describe('[T3.3] when given a LeaveGame command', () => {
+      describe('when there is no game in progress', () => {
+        it('should throw an error', () => {
+          expect(() =>
+            gameArea.handleCommand({ type: 'LeaveGame', gameID: nanoid() }, player1),
+          ).toThrowError(GAME_NOT_IN_PROGRESS_MESSAGE);
+          expect(interactableUpdateSpy).not.toHaveBeenCalled();
+        });
+      });
+      describe('when there is a game in progress', () => {
+        it('should throw an error when the game ID does not match', () => {
+          gameArea.handleCommand({ type: 'JoinGame' }, player1);
+          interactableUpdateSpy.mockClear();
+          expect(() =>
+            gameArea.handleCommand({ type: 'LeaveGame', gameID: nanoid() }, player1),
+          ).toThrowError(GAME_ID_MISSMATCH_MESSAGE);
+          expect(interactableUpdateSpy).not.toHaveBeenCalled();
+        });
+        it('should dispatch the leave command to the game and call _emitAreaChanged', () => {
+          const { gameID } = gameArea.handleCommand({ type: 'JoinGame' }, player1);
+          if (!game) {
+            throw new Error('Game was not created by the first call to join');
+          }
+          expect(interactableUpdateSpy).toHaveBeenCalledTimes(1);
+          const leaveSpy = jest.spyOn(game, 'leave');
+          gameArea.handleCommand({ type: 'LeaveGame', gameID }, player1);
+          expect(leaveSpy).toHaveBeenCalledWith(player1);
+          expect(interactableUpdateSpy).toHaveBeenCalledTimes(2);
+        });
+        it('should not call _emitAreaChanged if the game throws an error', () => {
+          gameArea.handleCommand({ type: 'JoinGame' }, player1);
+          if (!game) {
+            throw new Error('Game was not created by the first call to join');
+          }
+          interactableUpdateSpy.mockClear();
+          const leaveSpy = jest.spyOn(game, 'leave').mockImplementationOnce(() => {
+            throw new Error('Test Error');
+          });
+          expect(() =>
+            gameArea.handleCommand({ type: 'LeaveGame', gameID: game.id }, player1),
+          ).toThrowError('Test Error');
+          expect(leaveSpy).toHaveBeenCalledWith(player1);
+          expect(interactableUpdateSpy).not.toHaveBeenCalled();
+        });
+        it('should update the history if the game is over', () => {
+          const { gameID } = gameArea.handleCommand({ type: 'JoinGame' }, player1);
+          gameArea.handleCommand({ type: 'JoinGame' }, player2);
+          interactableUpdateSpy.mockClear();
+          jest.spyOn(game, 'leave').mockImplementationOnce(() => {
+            game.endGame(player1.id);
+          });
+          gameArea.handleCommand({ type: 'LeaveGame', gameID }, player1);
+          expect(game.state.status).toEqual('OVER');
+          expect(gameArea.history.length).toEqual(1);
+          expect(gameArea.history[0]).toEqual({
+            gameID: game.id,
+            scores: {},
+          });
+          expect(interactableUpdateSpy).toHaveBeenCalledTimes(1);
+        });
+      });
+    });
   });
 });
