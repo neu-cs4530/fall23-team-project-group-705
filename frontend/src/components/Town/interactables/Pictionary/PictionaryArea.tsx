@@ -66,7 +66,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       console.log('pause town controller');
       townController.pause();
     }
-  }, [gameArea]);
+  }, [gameArea, townController]);
 
   useEffect(() => {
     const updateGameState = () => {
