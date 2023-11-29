@@ -13,7 +13,7 @@ import PictionaryAreaController from '../../../../classes/interactable/Pictionar
 import PlayerController from '../../../../classes/PlayerController';
 import { useInteractable, useInteractableAreaController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
-import { GameResult, GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
+import { GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
 import GameAreaInteractable from '../GameArea';
 import GameNotStartedScreen from './GameNotStartedScreen';
 import GameStartedScreen from './GameStartedScreen';
@@ -183,7 +183,11 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
           interactableID={interactableID}
         />
       ) : (
-        <GameNotStartedScreen gameStatusText={gameStatusText} observers={observers} />
+        <GameNotStartedScreen
+          gameStatusText={gameStatusText}
+          observers={observers}
+          gameAreaController={gameAreaController}
+        />
       )}
     </Container>
   );

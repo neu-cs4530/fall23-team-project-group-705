@@ -214,7 +214,8 @@ export default function Whiteboard({
           <form
             onSubmit={event => {
               event.preventDefault();
-              const newDrawerId = (event.target as any).drawerId.value;
+              const newDrawerId = (event.target as EventTarget & { drawerId: { value: string } })
+                .drawerId.value;
               if (!newDrawerId) {
                 whiteboardToast({
                   title: 'No new drawer selected',
