@@ -43,7 +43,6 @@ import ViewingAreaController from './interactable/ViewingAreaController';
 import WhiteboardAreaController from './interactable/WhiteboardAreaController';
 import PictionaryAreaController from './interactable/PictionaryAreaController';
 import PlayerController from './PlayerController';
-import WhiteboardArea from '../components/Town/interactables/Whiteboard/WhiteboardArea';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -330,6 +329,13 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       eachInteractable => eachInteractable instanceof ViewingAreaController,
     );
     return ret as ViewingAreaController[];
+  }
+
+  public get whiteboardAreas() {
+    const ret = this._interactableControllers.filter(
+      eachInteractable => eachInteractable instanceof WhiteboardAreaController,
+    );
+    return ret as WhiteboardAreaController[];
   }
 
   public get gameAreas() {
@@ -622,6 +628,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         );
 
         this._interactableControllers = [];
+        const whiteboardAreaControllers: WhiteboardAreaController[] = [];
         initialData.interactables.forEach(eachInteractable => {
           if (isConversationArea(eachInteractable)) {
             this._interactableControllers.push(
@@ -633,16 +640,36 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
           } else if (isViewingArea(eachInteractable)) {
             this._interactableControllers.push(new ViewingAreaController(eachInteractable));
           } else if (isWhiteboardArea(eachInteractable)) {
-            this._interactableControllers.push(
-              new WhiteboardAreaController(eachInteractable.id, eachInteractable, this),
+            const whiteboardAreaController = new WhiteboardAreaController(
+              eachInteractable.id,
+              eachInteractable,
+              this,
             );
-          } else if (isPictionaryArea(eachInteractable)) {
-            this._interactableControllers.push(
-              new PictionaryAreaController(eachInteractable.id, eachInteractable, this),
-            );
+            this._interactableControllers.push(whiteboardAreaController);
+            whiteboardAreaControllers.push(whiteboardAreaController);
           } else if (isTicTacToeArea(eachInteractable)) {
             this._interactableControllers.push(
               new TicTacToeAreaController(eachInteractable.id, eachInteractable, this),
+            );
+          }
+        });
+        initialData.interactables.forEach(eachInteractable => {
+          if (isPictionaryArea(eachInteractable)) {
+            const whiteboardAreaController = whiteboardAreaControllers.find(areaController => {
+              return areaController.id === `${eachInteractable.id}WhiteboardArea`;
+            });
+            if (!whiteboardAreaController) {
+              throw new Error(
+                "PictionaryAreaController is missing it's companion WhiteboardAreaController.",
+              );
+            }
+            this._interactableControllers.push(
+              new PictionaryAreaController(
+                eachInteractable.id,
+                eachInteractable,
+                this,
+                whiteboardAreaController,
+              ),
             );
           }
         });
@@ -797,9 +824,10 @@ export function useTownSettings() {
  */
 export function useInteractableAreaController<T>(interactableAreaID: string): T {
   const townController = useTownController();
-  const interactableAreaController = townController.gameAreas.find(
-    eachArea => eachArea.id == interactableAreaID,
-  );
+  const interactableAreaController = [
+    ...townController.gameAreas,
+    ...townController.whiteboardAreas,
+  ].find(eachArea => eachArea.id == interactableAreaID);
   if (!interactableAreaController) {
     throw new Error(`Requested interactable area ${interactableAreaID} does not exist`);
   }

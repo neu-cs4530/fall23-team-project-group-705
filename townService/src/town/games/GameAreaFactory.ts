@@ -1,6 +1,7 @@
 import { ITiledMapObject } from '@jonbell/tiled-map-type-guard';
 import { BoundingBox, TownEmitter } from '../../types/CoveyTownSocket';
 import InteractableArea from '../InteractableArea';
+import WhiteboardArea from '../WhiteboardArea';
 import PictionaryGameArea from './PictionaryGameArea';
 import TicTacToeGameArea from './TicTacToeGameArea';
 
@@ -14,7 +15,7 @@ import TicTacToeGameArea from './TicTacToeGameArea';
 export default function GameAreaFactory(
   mapObject: ITiledMapObject,
   broadcastEmitter: TownEmitter,
-): InteractableArea {
+): InteractableArea[] {
   const { name, width, height } = mapObject;
   if (!width || !height) {
     throw new Error(`Malformed viewing area ${name}`);
@@ -22,10 +23,18 @@ export default function GameAreaFactory(
   const rect: BoundingBox = { x: mapObject.x, y: mapObject.y, width, height };
   const gameType = mapObject.properties?.find(prop => prop.name === 'type')?.value;
   if (gameType === 'TicTacToe') {
-    return new TicTacToeGameArea(name, rect, broadcastEmitter);
+    return [new TicTacToeGameArea(name, rect, broadcastEmitter)];
   }
   if (gameType === 'Pictionary') {
-    return new PictionaryGameArea(name, rect, broadcastEmitter);
+    const whiteboardArea = new WhiteboardArea(
+      { id: `${name}WhiteboardArea`, occupants: [], viewers: [], drawer: undefined },
+      { x: 0, y: 0, width: 0, height: 0 },
+      broadcastEmitter,
+    );
+    return [
+      new PictionaryGameArea(name, rect, broadcastEmitter, whiteboardArea.id),
+      whiteboardArea,
+    ];
   }
   throw new Error(`Unknown game area type ${mapObject.class}`);
 }

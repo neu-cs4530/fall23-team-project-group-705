@@ -25,13 +25,19 @@ import PictionaryGame from './PictionaryGame';
  * @see GameArea
  */
 export default class PictionaryGameArea extends GameArea<PictionaryGame> {
-  public constructor(id: string, { x, y, width, height }: BoundingBox, townEmitter: TownEmitter, disableTickForTesting?: boolean) {
+  private _whiteboardID: string;
+
+  public constructor(
+    id: string,
+    { x, y, width, height }: BoundingBox,
+    townEmitter: TownEmitter,
+    whiteboardID: string,
+  ) {
     super(id, { x, y, width, height }, townEmitter);
-    if (disableTickForTesting === undefined || !disableTickForTesting) {
-      setTimeout(() => {
-        this._tick();
-      }, 1000);
-    }
+    this._whiteboardID = whiteboardID;
+    setTimeout(() => {
+      this._tick();
+    }, 1000);
   }
 
   protected getType(): InteractableType {
@@ -55,6 +61,10 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
       }
     }
     return scoresWithName;
+  }
+
+  public get whiteboardID() {
+    return this._whiteboardID;
   }
 
   private _stateUpdated(updatedState: GameInstance<PictionaryGameState>) {

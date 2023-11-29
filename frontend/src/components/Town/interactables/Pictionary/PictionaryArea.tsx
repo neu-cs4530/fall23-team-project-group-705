@@ -46,7 +46,7 @@ import GameStartedScreen from './GameStartedScreen';
  *    - Tie: description 'Game ended in a tie'
  *    - Our player won: description 'You won!'
  *    - Our player lost: description 'You lost :('
- *
+ *whiteboardArea
  */
 function PictionaryArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
   const gameAreaController =
@@ -107,6 +107,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     gameAreaController.currentWord,
     gameAreaController.betweenTurns,
     gameAreaController.timer,
+    gameAreaController,
     toast,
   ]);
 
@@ -169,11 +170,13 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       </b>
     );
   }
-
   return (
     <Container maxW={'fit-content'} maxH={'fit-content'}>
       {gameStatus === 'IN_PROGRESS' ? (
-        <GameStartedScreen gameAreaController={gameAreaController} />
+        <GameStartedScreen
+          gameAreaController={gameAreaController}
+          interactableID={interactableID}
+        />
       ) : (
         <GameNotStartedScreen
           gameStatusText={gameStatusText}

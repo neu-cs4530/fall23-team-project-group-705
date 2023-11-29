@@ -54,13 +54,11 @@ export default class WhiteboardAreaController extends InteractableAreaController
 
   public isDrawer(): boolean {
     return this._model.drawer === undefined
-      ? true
+      ? false
       : this._model.drawer.id === this._townController.ourPlayer.id;
   }
 
-  protected _updateFrom(newModel: WhiteboardAreaModel): void {
-    // TODO: Update the board
-  }
+  protected _updateFrom(newModel: WhiteboardAreaModel): void {}
 
   public handleServerResponse(response: WhiteboardServerResponse) {
     if (response.type === 'WhiteboardPlayerJoin') {
@@ -92,6 +90,10 @@ export default class WhiteboardAreaController extends InteractableAreaController
 
     if (response.type === 'WhiteboardNewDrawer') {
       this._handleNewDrawer(response.drawer, response.viewers);
+    }
+
+    if (response.type === 'WhiteboardClearDrawer') {
+      this._handleClearDrawer(response.viewers);
     }
   }
 
@@ -154,12 +156,18 @@ export default class WhiteboardAreaController extends InteractableAreaController
     });
   }
 
-  private _handleNewDrawer(drawer: WhiteboardPlayer | undefined, viewers: WhiteboardPlayer[]) {
+  private _handleNewDrawer(drawer: WhiteboardPlayer, viewers: WhiteboardPlayer[]) {
     this._model.drawer = drawer;
     this._model.viewers = viewers;
     this.emit('whiteboardNewDrawer', {
       player: drawer,
     });
+  }
+
+  private _handleClearDrawer(viewers: WhiteboardPlayer[]) {
+    this._model.drawer = undefined;
+    this._model.viewers = viewers;
+    this.emit('whiteboardClearDrawer');
   }
 
   /**
@@ -211,10 +219,17 @@ export default class WhiteboardAreaController extends InteractableAreaController
     }
   }
 
-  public async drawerChange(newDrawerId: string) {
+  public async drawerChange(newDrawerId: string, eraseBoard?: boolean) {
     await this._townController.sendInteractableCommand(this.id, {
       type: 'WhiteboardDrawerChange',
       newDrawerId,
+      eraseBoard,
+    });
+  }
+
+  public async clearDrawer() {
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'WhiteboardClearDrawerChange',
     });
   }
 }

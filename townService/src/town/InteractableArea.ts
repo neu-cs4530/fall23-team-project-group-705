@@ -145,6 +145,12 @@ export default abstract class InteractableArea {
    * @returns true if a player could be contained within both InteractableAreas simultaneously
    */
   public overlaps(otherInteractable: InteractableArea): boolean {
+    // Assume that zero size interactables are not actually meant to occupy physical space (eg. whiteboard in pictionary game)
+    if (
+      (this._width === 0 && this._height === 0) ||
+      (otherInteractable._width === 0 && otherInteractable._height === 0)
+    )
+      return false;
     const toRectPoints = ({ _x, _y, _width, _height }: InteractableArea) => ({
       x1: _x - PLAYER_SPRITE_WIDTH / 2,
       x2: _x + _width + PLAYER_SPRITE_WIDTH / 2,
