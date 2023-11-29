@@ -53,7 +53,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     useInteractableAreaController<PictionaryAreaController>(interactableID);
   const townController = useTownController();
 
-  const [history, setHistory] = useState<GameResult[]>(gameAreaController.history);
   const [isPlayer, setIsPlayer] = useState<boolean>(gameAreaController.isPlayer);
   const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
   const [observers, setObservers] = useState<PlayerController[]>(gameAreaController.observers);
@@ -61,7 +60,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   const [drawer, setDrawer] = useState<PlayerController | undefined>(gameAreaController.drawer);
   const toast = useToast();
   const gameArea = useInteractable<GameAreaInteractable>('gameArea');
-  
+
   useEffect(() => {
     if (gameArea) {
       console.log('pause town controller');
@@ -71,7 +70,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
 
   useEffect(() => {
     const updateGameState = () => {
-      setHistory(gameAreaController.history);
       setIsPlayer(gameAreaController.isPlayer);
       setGameStatus(gameAreaController.status || 'WAITING_TO_START');
       setObservers(gameAreaController.observers);
@@ -107,7 +105,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     };
   }, [
     townController,
-    gameAreaController.history,
     gameAreaController.isPlayer,
     gameAreaController.status,
     gameAreaController.observers,

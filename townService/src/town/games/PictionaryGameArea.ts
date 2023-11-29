@@ -24,12 +24,7 @@ import PictionaryGame from './PictionaryGame';
  * @see GameArea
  */
 export default class PictionaryGameArea extends GameArea<PictionaryGame> {
-
-  public constructor(
-    id: string,
-    { x, y, width, height }: BoundingBox,
-    townEmitter: TownEmitter,
-  ) {
+  public constructor(id: string, { x, y, width, height }: BoundingBox, townEmitter: TownEmitter) {
     super(id, { x, y, width, height }, townEmitter);
     setTimeout(() => {
       this._tick();

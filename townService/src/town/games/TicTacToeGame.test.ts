@@ -67,12 +67,14 @@ describe('TicTacToeGame', () => {
     });
   });
   describe('[T1.2] _leave', () => {
-    it('should throw an error if the player is not in the game', () => {
-      expect(() => game.leave(createPlayerForTesting())).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
+    it('should do nothing if the player is not in the game', () => {
+      expect(() => game.leave(createPlayerForTesting())).not.toThrowError(
+        PLAYER_NOT_IN_GAME_MESSAGE,
+      );
       // TODO weaker test suite only does one of these - above or below
       const player = createPlayerForTesting();
       game.join(player);
-      expect(() => game.leave(createPlayerForTesting())).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
+      expect(() => game.leave(createPlayerForTesting())).not.toThrowError();
     });
     describe('when the player is in the game', () => {
       describe('when the game is in progress, it should set the game status to OVER and declare the other player the winner', () => {

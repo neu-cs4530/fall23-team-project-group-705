@@ -6,7 +6,6 @@ import { GameMove, PictionaryMove, PlayerID } from '../../types/CoveyTownSocket'
 import {
   GAME_STARTED_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
-  PLAYER_NOT_IN_GAME_MESSAGE,
 } from '../../lib/InvalidParametersError';
 
 describe('PictionaryGame', () => {
@@ -81,8 +80,8 @@ describe('PictionaryGame', () => {
       it('should throw error when the a player join twice', () => {
         expect(() => game.join(player2)).toThrowError(PLAYER_ALREADY_IN_GAME_MESSAGE);
       });
-      it('should throw error when the leave() enter a new player', () => {
-        expect(() => game.leave(player4)).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
+      it('should do nothing if the player is not in the game', () => {
+        expect(() => game.leave(player4)).not.toThrowError();
       });
       it('should end the game when there is no player', () => {
         game.leave(player1);
