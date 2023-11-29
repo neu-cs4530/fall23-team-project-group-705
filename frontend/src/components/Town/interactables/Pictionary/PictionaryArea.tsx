@@ -13,7 +13,7 @@ import PictionaryAreaController from '../../../../classes/interactable/Pictionar
 import PlayerController from '../../../../classes/PlayerController';
 import { useInteractable, useInteractableAreaController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
-import { GameResult, GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
+import { GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
 import GameAreaInteractable from '../GameArea';
 import GameNotStartedScreen from './GameNotStartedScreen';
 import GameStartedScreen from './GameStartedScreen';
@@ -53,7 +53,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     useInteractableAreaController<PictionaryAreaController>(interactableID);
   const townController = useTownController();
 
-  const [history, setHistory] = useState<GameResult[]>(gameAreaController.history);
   const [isPlayer, setIsPlayer] = useState<boolean>(gameAreaController.isPlayer);
   const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
   const [observers, setObservers] = useState<PlayerController[]>(gameAreaController.observers);
@@ -63,7 +62,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
 
   useEffect(() => {
     const updateGameState = () => {
-      setHistory(gameAreaController.history);
       setIsPlayer(gameAreaController.isPlayer);
       setGameStatus(gameAreaController.status || 'WAITING_TO_START');
       setObservers(gameAreaController.observers);
@@ -178,7 +176,11 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
           interactableID={interactableID}
         />
       ) : (
-        <GameNotStartedScreen gameStatusText={gameStatusText} observers={observers} />
+        <GameNotStartedScreen
+          gameStatusText={gameStatusText}
+          observers={observers}
+          gameAreaController={gameAreaController}
+        />
       )}
     </Container>
   );

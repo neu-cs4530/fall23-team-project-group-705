@@ -14,6 +14,7 @@ import {
   PictionaryGameState,
   BoundingBox,
   TownEmitter,
+  PlayerID,
 } from '../../types/CoveyTownSocket';
 import GameArea from './GameArea';
 import PictionaryGame from './PictionaryGame';
@@ -31,16 +32,38 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     { x, y, width, height }: BoundingBox,
     townEmitter: TownEmitter,
     whiteboardID: string,
+    disableTickForTesting?: boolean,
   ) {
     super(id, { x, y, width, height }, townEmitter);
     this._whiteboardID = whiteboardID;
-    setTimeout(() => {
-      this._tick();
-    }, 1000);
+    if (disableTickForTesting === undefined || !disableTickForTesting) {
+      setTimeout(() => {
+        this._tick();
+      }, 1000);
+    }
   }
 
   protected getType(): InteractableType {
     return 'PictionaryArea';
+  }
+
+  private _findPlayerName(id: PlayerID): string | undefined {
+    return this._game?.findplayer(id);
+  }
+
+  private _scoresWithName(state: PictionaryGameState): { [playerName: string]: number } {
+    const scoresWithName: { [playerName: string]: number } = {};
+    if (state.scores) {
+      for (const playerId in state.scores) {
+        if (Object.prototype.hasOwnProperty.call(state.scores, playerId)) {
+          const playerName = this._findPlayerName(playerId);
+          if (playerName) {
+            scoresWithName[playerName] = state.scores[playerId];
+          }
+        }
+      }
+    }
+    return scoresWithName;
   }
 
   public get whiteboardID() {
@@ -52,19 +75,11 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
       // If we haven't yet recorded the outcome, do so now.
       const gameID = this._game?.id;
       if (gameID && !this._history.find(eachResult => eachResult.gameID === gameID)) {
-        const { scores } = updatedState.state;
-        if (scores) {
-          /*
-          const xName = this._occupants.find(eachPlayer => eachPlayer.id === x)?.userName || x;
-          const oName = this._occupants.find(eachPlayer => eachPlayer.id === o)?.userName || o;
+        if (updatedState.state.status === 'OVER') {
           this._history.push({
             gameID,
-            scores: {
-              [xName]: updatedState.state.winner === x ? 1 : 0,
-              [oName]: updatedState.state.winner === o ? 1 : 0,
-            },
+            scores: this._scoresWithName(updatedState.state),
           });
-          */
         }
       }
     }
@@ -158,7 +173,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
   }
 
-  // Ticks the game forwards by one second, updating both back and frontend.
+  // Ticks the game forwards by one second, updating both back and frontend
   private _tick(): void {
     if (this._game !== undefined) {
       this._game.tick();
