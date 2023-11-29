@@ -32,12 +32,15 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     { x, y, width, height }: BoundingBox,
     townEmitter: TownEmitter,
     whiteboardID: string,
+    disableTickForTesting?: boolean,
   ) {
     super(id, { x, y, width, height }, townEmitter);
     this._whiteboardID = whiteboardID;
-    setTimeout(() => {
-      this._tick();
-    }, 1000);
+    if (disableTickForTesting === undefined || !disableTickForTesting) {
+      setTimeout(() => {
+        this._tick();
+      }, 1000);
+    }
   }
 
   protected getType(): InteractableType {
