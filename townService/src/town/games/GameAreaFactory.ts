@@ -32,7 +32,7 @@ export default function GameAreaFactory(
       broadcastEmitter,
     );
     return [
-      new PictionaryGameArea(name, rect, broadcastEmitter, whiteboardArea.id),
+      new PictionaryGameArea(name, rect, broadcastEmitter),
       whiteboardArea,
     ];
   }

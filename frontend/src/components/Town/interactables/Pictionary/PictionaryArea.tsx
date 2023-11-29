@@ -193,11 +193,19 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
 export default function PictionaryAreaWrapper(): JSX.Element {
   const gameArea = useInteractable<GameAreaInteractable>('gameArea');
   const townController = useTownController();
+
+  useEffect(() => {
+    if (gameArea) {
+      townController.pause();
+    }
+  }, [townController, gameArea]);
+
   const closeModal = useCallback(() => {
     if (gameArea) {
       townController.interactEnd(gameArea);
       const controller = townController.getGameAreaController(gameArea);
       controller.leaveGame();
+      townController.unPause();
     }
   }, [townController, gameArea]);
 
