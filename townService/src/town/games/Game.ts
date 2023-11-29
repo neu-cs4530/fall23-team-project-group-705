@@ -79,8 +79,10 @@ export default abstract class Game<StateType extends GameState, MoveType> {
    * @throws InvalidParametersError if the player can not leave the game
    */
   public leave(player: Player): void {
-    this._leave(player);
-    this._players = this._players.filter(p => p.id !== player.id);
+    if (this._players.some(p => p.id === player.id)) {
+      this._leave(player);
+      this._players = this._players.filter(p => p.id !== player.id);
+    }
   }
 
   public toModel(): GameInstance<StateType> {

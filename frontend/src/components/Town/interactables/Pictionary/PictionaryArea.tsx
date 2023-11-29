@@ -60,6 +60,14 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   const [joiningGame, setJoiningGame] = useState(false);
   const [drawer, setDrawer] = useState<PlayerController | undefined>(gameAreaController.drawer);
   const toast = useToast();
+  const gameArea = useInteractable<GameAreaInteractable>('gameArea');
+  
+  useEffect(() => {
+    if (gameArea) {
+      console.log('pause town controller');
+      townController.pause();
+    }
+  }, [gameArea]);
 
   useEffect(() => {
     const updateGameState = () => {
@@ -193,12 +201,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
 export default function PictionaryAreaWrapper(): JSX.Element {
   const gameArea = useInteractable<GameAreaInteractable>('gameArea');
   const townController = useTownController();
-
-  useEffect(() => {
-    if (gameArea) {
-      townController.pause();
-    }
-  }, [townController, gameArea]);
 
   const closeModal = useCallback(() => {
     if (gameArea) {
