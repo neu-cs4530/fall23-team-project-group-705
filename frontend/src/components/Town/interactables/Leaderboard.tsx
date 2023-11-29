@@ -100,32 +100,23 @@ export function PictionaryLeaderboard({ results }: { results: GameResult[] }): J
   const playerNameList: string[] = [];
   results.forEach(result => {
     const playerNames = Object.keys(result.scores);
-    if (playerNameList === null || undefined) {
-      playerNames.forEach(playerName => {
-        const newPlayerData = {
-          player: playerName,
-          score: result.scores[playerName],
-        };
-        scoreByPlayer[playerName] = newPlayerData;
-      });
-    } else {
-      const matchingPlayerNames = playerNames.filter(name => playerNameList.includes(name));
-      matchingPlayerNames.forEach(playerName => {
-        const newPlayerData = {
-          player: playerName,
-          score: scoreByPlayer[playerName].score + result.scores[playerName],
-        };
-        scoreByPlayer[playerName] = newPlayerData;
-      });
-      const notMatchingPlayerNames = playerNames.filter(name => !playerNameList.includes(name));
-      notMatchingPlayerNames.forEach(playerName => {
-        const newPlayerData = {
-          player: playerName,
-          score: result.scores[playerName],
-        };
-        scoreByPlayer[playerName] = newPlayerData;
-      });
-    }
+    const matchingPlayerNames = playerNames.filter(name => playerNameList.includes(name));
+    matchingPlayerNames.forEach(playerName => {
+      const newPlayerData = {
+        player: playerName,
+        score: scoreByPlayer[playerName].score + result.scores[playerName],
+      };
+      scoreByPlayer[playerName] = newPlayerData;
+    });
+    const notMatchingPlayerNames = playerNames.filter(name => !playerNameList.includes(name));
+    notMatchingPlayerNames.forEach(playerName => {
+      const newPlayerData = {
+        player: playerName,
+        score: result.scores[playerName],
+      };
+      scoreByPlayer[playerName] = newPlayerData;
+      playerNameList.push(playerName);
+    });
   });
   const rows = Object.keys(scoreByPlayer).map(player => scoreByPlayer[player]);
   rows.sort((a, b) => b.score - a.score);
