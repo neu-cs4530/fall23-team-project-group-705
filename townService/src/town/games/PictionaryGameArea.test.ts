@@ -65,7 +65,7 @@ describe('PictionaryGameArea', () => {
       nanoid(),
       { x: 0, y: 0, width: 100, height: 100 },
       mock<TownEmitter>(),
-      true,
+      nanoid(),
     );
     gameArea.add(player1);
     gameArea.add(player2);
